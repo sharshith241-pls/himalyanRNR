@@ -1,16 +1,14 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 export default function RegisterPage() {
-  return (
-    <main style={{ padding: "2rem", maxWidth: "400px" }}>
-      <h1>Register</h1>
+  const router = useRouter();
 
-      <input placeholder="Full Name" />
-      <br /><br />
-      <input type="email" placeholder="Email" />
-      <br /><br />
-      <input type="password" placeholder="Password" />
-      <br /><br />
+  useEffect(() => {
+    router.replace("/auth/register");
+  }, [router]);
 
-      <button>Create Account</button>
-    </main>
-  );
+  return null;
 }

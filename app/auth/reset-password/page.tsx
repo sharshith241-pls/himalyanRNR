@@ -1,0 +1,171 @@
+"use client";
+
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
+import { updatePassword } from "@/utils/auth/actions";
+import { validatePassword, validatePasswordMatch } from "@/utils/auth/helpers";
+
+export default function ResetPasswordPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState("");
+  const [invalidToken, setInvalidToken] = useState(false);
+
+  useEffect(() => {
+    // Check if we have a valid reset token in the URL
+    const token = searchParams.get("code");
+    const type = searchParams.get("type");
+
+    if (!token || type !== "recovery") {
+      setInvalidToken(true);
+      setError("Invalid or expired reset link. Please request a new one.");
+    }
+  }, [searchParams]);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+    setSuccess("");
+
+    // Client-side validation
+    if (!password) {
+      setError("Password is required");
+      return;
+    }
+
+    const passwordError = validatePassword(password);
+    if (passwordError) {
+      setError(passwordError);
+      return;
+    }
+
+    if (!confirmPassword) {
+      setError("Please confirm your password");
+      return;
+    }
+
+    const matchError = validatePasswordMatch(password, confirmPassword);
+    if (matchError) {
+      setError(matchError);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const result = await updatePassword(password);
+
+      if (result.success) {
+        setSuccess(result.message || "Password updated successfully!");
+        setPassword("");
+        setConfirmPassword("");
+        setTimeout(() => router.push("/auth/login"), 2000);
+      } else {
+        setError(result.error || "Failed to update password");
+      }
+    } catch (err) {
+      setError("An unexpected error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (invalidToken) {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold text-center mb-2">
+          Reset Password
+        </h1>
+
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+          {error}
+        </div>
+
+        <div className="text-center text-sm text-gray-600 mt-6">
+          <a
+            href="/auth/forgot-password"
+            className="text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Request a new reset link
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h1 className="text-3xl font-bold text-center mb-2">
+        Set New Password
+      </h1>
+      <p className="text-center text-gray-600 mb-8">
+        Enter your new password below
+      </p>
+
+      {error && (
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-md text-sm">
+          {success}
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label htmlFor="password" className="block text-sm font-medium mb-1">
+            New Password (min 8 characters)
+          </label>
+          <input
+            id="password"
+            type="password"
+            placeholder="••••••••"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+          />
+        </div>
+
+        <div>
+          <label htmlFor="confirmPassword" className="block text-sm font-medium mb-1">
+            Confirm Password
+          </label>
+          <input
+            id="confirmPassword"
+            type="password"
+            placeholder="••••••••"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            disabled={loading}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100"
+          />
+        </div>
+
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white py-2 rounded-md font-medium hover:bg-blue-700 disabled:bg-gray-400 transition duration-200"
+        >
+          {loading ? "Updating..." : "Update Password"}
+        </button>
+      </form>
+
+      <div className="mt-6 text-center text-sm text-gray-600">
+        <a
+          href="/auth/login"
+          className="text-blue-600 hover:text-blue-700 font-medium"
+        >
+          Back to Sign In
+        </a>
+      </div>
+    </div>
+  );
+}
