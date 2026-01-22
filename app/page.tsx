@@ -11,6 +11,12 @@ export default function HomePage() {
 
   useEffect(() => {
     const fetchTreks = async () => {
+      if (!supabase) {
+        setError("Supabase is not configured");
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from("treks")
         .select("*");
