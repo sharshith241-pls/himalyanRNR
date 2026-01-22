@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { updatePassword } from "@/utils/auth/actions";
 import { validatePassword, validatePasswordMatch } from "@/utils/auth/helpers";
 
-export default function ResetPasswordPage() {
+function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [password, setPassword] = useState("");
@@ -167,5 +167,13 @@ export default function ResetPasswordPage() {
         </a>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<div className="text-center">Loading...</div>}>
+      <ResetPasswordContent />
+    </Suspense>
   );
 }
