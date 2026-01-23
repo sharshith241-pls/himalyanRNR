@@ -148,9 +148,6 @@ export default function HomePage() {
             <Link href="/treks" className="text-gray-700 hover:text-teal-600">
               Treks
             </Link>
-            <Link href="/admin/treks" className="text-gray-700 hover:text-teal-600">
-              Admin
-            </Link>
             <Link
               href="/auth/login"
               className="text-gray-700 hover:text-teal-600"
