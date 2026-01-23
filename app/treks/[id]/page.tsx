@@ -268,49 +268,49 @@ export default function TrekDetailPage() {
                 { icon: "👥", label: "Max Group", value: `${trek.max_participants} people` },
                 { icon: "📍", label: "Location", value: trek.location },
               ].map((stat, i) => (
-                <div key={i} className="bg-gradient-to-br from-teal-50 to-blue-50 p-4 rounded-lg">
-                  <div className="text-3xl mb-2">{stat.icon}</div>
-                  <p className="text-xs text-gray-600">{stat.label}</p>
-                  <p className="font-bold text-gray-900">{stat.value}</p>
+                <div key={i} className="bg-gradient-to-br from-teal-50 to-blue-50 p-4 rounded-lg border-2 border-teal-200">
+                  <div className="text-4xl mb-3">{stat.icon}</div>
+                  <p className="text-sm font-black text-gray-900 mb-1">{stat.label}</p>
+                  <p className="font-black text-lg text-teal-700">{stat.value}</p>
                 </div>
               ))}
             </div>
 
             {/* Description */}
             <div>
-              <h2 className="text-3xl font-bold mb-4">About This Trek</h2>
-              <p className="text-gray-700 text-lg leading-relaxed">{trek.description}</p>
+              <h2 className="text-4xl font-black mb-4 text-gray-900">About This Trek</h2>
+              <p className="text-gray-800 text-lg leading-relaxed font-medium">{trek.description}</p>
             </div>
 
             {/* Itinerary */}
             <div>
-              <h2 className="text-3xl font-bold mb-4">📋 Itinerary</h2>
-              <div className="bg-gray-50 p-6 rounded-lg border-l-4 border-teal-600">
-                <p className="text-gray-700 whitespace-pre-line leading-relaxed">{trek.itinerary}</p>
+              <h2 className="text-4xl font-black mb-4 text-gray-900">📋 Itinerary</h2>
+              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-lg border-l-4 border-teal-600 border-2 border-t-0 border-r-0 border-b-0">
+                <p className="text-gray-800 whitespace-pre-line leading-relaxed font-medium text-base">{trek.itinerary}</p>
               </div>
             </div>
 
             {/* What's Included */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h2 className="text-2xl font-bold mb-4">✅ What's Included</h2>
+                <h2 className="text-3xl font-black mb-4 text-gray-900">✅ What's Included</h2>
                 <div className="space-y-3">
                   {trek.included?.split(",").map((item, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      <span className="text-2xl">✓</span>
-                      <span className="text-gray-700">{item.trim()}</span>
+                    <div key={i} className="flex items-start gap-3 p-2 hover:bg-green-50 rounded transition">
+                      <span className="text-2xl flex-shrink-0">✓</span>
+                      <span className="text-gray-800 font-semibold text-base">{item.trim()}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
               <div>
-                <h2 className="text-2xl font-bold mb-4">❌ What's NOT Included</h2>
+                <h2 className="text-3xl font-black mb-4 text-gray-900">❌ What's NOT Included</h2>
                 <div className="space-y-3">
                   {trek.not_included?.split(",").map((item, i) => (
-                    <div key={i} className="flex items-start gap-3">
-                      <span className="text-2xl">✗</span>
-                      <span className="text-gray-700">{item.trim()}</span>
+                    <div key={i} className="flex items-start gap-3 p-2 hover:bg-red-50 rounded transition">
+                      <span className="text-2xl flex-shrink-0">✗</span>
+                      <span className="text-gray-800 font-semibold text-base">{item.trim()}</span>
                     </div>
                   ))}
                 </div>

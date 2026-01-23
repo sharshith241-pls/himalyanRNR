@@ -226,10 +226,10 @@ export default function HomePage() {
         <div className="absolute inset-0 bg-grid-white/5 bg-[size:60px_60px] pointer-events-none" />
         <div className="relative max-w-7xl mx-auto px-4 text-center">
           <div className="animate-fade-in space-y-6">
-            <h2 className="text-5xl md:text-7xl font-bold">
+            <h2 className="text-5xl md:text-7xl font-black text-white drop-shadow-lg">
               Explore the Himalayas
             </h2>
-            <p className="text-xl text-teal-100 max-w-2xl mx-auto">
+            <p className="text-2xl text-white max-w-2xl mx-auto font-bold drop-shadow-md">
               Discover breathtaking mountain trails, connect with nature, and create unforgettable memories with Himalayan Runners
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
@@ -253,17 +253,17 @@ export default function HomePage() {
       {/* Features Section */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
-          <h3 className="text-3xl font-bold text-center mb-12">Why Choose Himalayan Runners?</h3>
+          <h3 className="text-4xl font-black text-center mb-12 text-gray-900">Why Choose Himalayan Runners?</h3>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { icon: "🏆", title: "Expert Guides", desc: "Experienced mountain guides with years of expertise" },
               { icon: "🛡️", title: "Safe & Secure", desc: "Top-notch safety equipment and protocols" },
               { icon: "👥", title: "Community", desc: "Join thousands of adventure enthusiasts" },
             ].map((feature, i) => (
-              <div key={i} className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-1">
-                <div className="text-4xl mb-4">{feature.icon}</div>
-                <h4 className="text-xl font-bold mb-2">{feature.title}</h4>
-                <p className="text-gray-600">{feature.desc}</p>
+              <div key={i} className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-1 border-t-4 border-teal-600">
+                <div className="text-5xl mb-4">{feature.icon}</div>
+                <h4 className="text-2xl font-black mb-3 text-gray-900">{feature.title}</h4>
+                <p className="text-gray-700 font-medium text-base leading-relaxed">{feature.desc}</p>
               </div>
             ))}
           </div>
@@ -273,7 +273,7 @@ export default function HomePage() {
       {/* Category Filters */}
       <section id="treks" className="py-16">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-4xl font-bold text-center mb-12">Explore by Category</h2>
+          <h2 className="text-5xl font-black text-center mb-12 text-gray-900">Explore by Category</h2>
 
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {CATEGORIES.map((category) => (
@@ -317,19 +317,19 @@ export default function HomePage() {
 
                   {/* Info */}
                   <div className="p-4">
-                    <h3 className="font-bold text-lg text-gray-900 mb-3 line-clamp-2 group-hover:text-teal-600 transition">
+                    <h3 className="font-black text-xl text-gray-900 mb-3 line-clamp-2 group-hover:text-teal-600 transition leading-tight">
                       {trek.title}
                     </h3>
 
-                    <div className="space-y-2 text-sm text-gray-600 mb-4">
+                    <div className="space-y-2 text-base text-gray-700 mb-4 font-medium">
                       <div className="flex items-center gap-2">
-                        <span>📍</span> {trek.location}
+                        <span>📍</span> <span className="font-bold text-gray-900">{trek.location}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span>⏱️</span> {trek.duration}
+                        <span>⏱️</span> <span className="font-bold text-gray-900">{trek.duration}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span>📈</span> {trek.difficulty}
+                        <span>📈</span> <span className="font-bold text-gray-900">{trek.difficulty}</span>
                       </div>
                     </div>
 

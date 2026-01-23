@@ -241,25 +241,25 @@ export default function TreksPage() {
           <div className="lg:col-span-1">
             <div className="bg-white rounded-lg shadow-md p-6 sticky top-24 space-y-6">
               <div>
-                <h3 className="font-bold text-lg mb-4">🔍 Search</h3>
+                <h3 className="font-black text-xl mb-4 text-gray-900">🔍 Search</h3>
                 <input
                   type="text"
                   placeholder="Trek name or location..."
                   value={searchQuery}
                   onChange={(e) => handleSearch(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent font-medium text-gray-900 placeholder:text-gray-500"
                 />
               </div>
 
               <div>
-                <h3 className="font-bold text-lg mb-4">📊 Sort By</h3>
+                <h3 className="font-black text-xl mb-4 text-gray-900">📊 Sort By</h3>
                 <select
                   value={sortBy}
                   onChange={(e) => {
                     setSortBy(e.target.value);
                     applyFilters(treks);
                   }}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent font-semibold text-gray-900 bg-white cursor-pointer"
                 >
                   <option value="newest">Newest</option>
                   <option value="price-asc">Price: Low to High</option>
@@ -268,10 +268,10 @@ export default function TreksPage() {
               </div>
 
               <div>
-                <h3 className="font-bold text-lg mb-4">📈 Difficulty</h3>
-                <div className="space-y-2">
+                <h3 className="font-black text-xl mb-4 text-gray-900">📈 Difficulty</h3>
+                <div className="space-y-3">
                   {["all", "Easy", "Moderate", "Difficult"].map((diff) => (
-                    <label key={diff} className="flex items-center gap-2 cursor-pointer">
+                    <label key={diff} className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition">
                       <input
                         type="radio"
                         name="difficulty"
@@ -281,9 +281,9 @@ export default function TreksPage() {
                           setDifficultyFilter(e.target.value);
                           applyFilters(treks);
                         }}
-                        className="rounded-full"
+                        className="rounded-full w-5 h-5 cursor-pointer"
                       />
-                      <span className="text-sm font-medium">
+                      <span className="text-base font-bold text-gray-900">
                         {diff === "all" ? "All Levels" : diff}
                       </span>
                     </label>
@@ -330,20 +330,20 @@ export default function TreksPage() {
 
                     {/* Info */}
                     <div className="p-6">
-                      <h3 className="font-bold text-xl text-gray-900 mb-3 line-clamp-2 group-hover:text-teal-600 transition">
+                      <h3 className="font-black text-2xl text-gray-900 mb-4 line-clamp-2 group-hover:text-teal-600 transition leading-tight">
                         {trek.title}
                       </h3>
 
-                      <div className="space-y-3 text-sm text-gray-600 mb-6">
+                      <div className="space-y-3 text-base text-gray-700 mb-6 font-medium">
                         <div className="flex items-center gap-2">
-                          <span>📍</span> {trek.location}
+                          <span>📍</span> <span className="font-bold text-gray-900">{trek.location}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span>⏱️</span> {trek.duration}
+                          <span>⏱️</span> <span className="font-bold text-gray-900">{trek.duration}</span>
                         </div>
                         {trek.description && (
                           <div className="flex items-start gap-2">
-                            <span>📝</span> <span className="line-clamp-2">{trek.description}</span>
+                            <span>📝</span> <span className="line-clamp-2 text-gray-700 font-medium">{trek.description}</span>
                           </div>
                         )}
                       </div>
