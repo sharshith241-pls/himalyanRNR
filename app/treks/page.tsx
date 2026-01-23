@@ -229,8 +229,8 @@ export default function TreksPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold mb-4">All Adventures</h1>
-          <p className="text-lg opacity-90">Choose your next unforgettable journey</p>
+          <h1 className="text-4xl md:text-5xl font-black mb-4">All Adventures</h1>
+          <p className="text-xl font-semibold">Choose your next unforgettable journey</p>
         </div>
       </section>
 
@@ -355,7 +355,7 @@ export default function TreksPage() {
                             ₹{trek.price.toLocaleString("en-IN")}
                           </span>
                           {trek.original_price && (
-                            <span className="text-sm text-gray-500 line-through">
+                            <span className="text-sm text-gray-700 line-through font-semibold">
                               ₹{trek.original_price.toLocaleString("en-IN")}
                             </span>
                           )}

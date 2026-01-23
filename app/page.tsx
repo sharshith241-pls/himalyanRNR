@@ -339,7 +339,7 @@ export default function HomePage() {
                         ₹{trek.price.toLocaleString("en-IN")}
                       </span>
                       {trek.original_price && (
-                        <span className="text-sm text-gray-500 line-through">
+                        <span className="text-sm text-gray-700 line-through font-semibold">
                           ₹{trek.original_price.toLocaleString("en-IN")}
                         </span>
                       )}
@@ -359,8 +359,8 @@ export default function HomePage() {
       {/* CTA Section */}
       <section className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold mb-4">Ready for Your Adventure?</h2>
-          <p className="text-lg mb-8 opacity-90">Join thousands of trekkers who have experienced the magic of the Himalayas</p>
+          <h2 className="text-5xl font-black mb-4">Ready for Your Adventure?</h2>
+          <p className="text-xl mb-8 font-semibold">Join thousands of trekkers who have experienced the magic of the Himalayas</p>
           <Link
             href="/treks"
             className="inline-block bg-white text-teal-600 px-8 py-4 rounded-lg font-bold hover:shadow-2xl transition transform hover:scale-105"
@@ -375,24 +375,24 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4">
           <div className="grid md:grid-cols-4 gap-8 mb-8">
             <div>
-              <h4 className="text-white font-bold mb-4">Himalayan Runners</h4>
-              <p className="text-sm">Your gateway to unforgettable mountain adventures.</p>
+              <h4 className="text-white font-black mb-4 text-lg">Himalayan Runners</h4>
+              <p className="text-sm text-gray-200">Your gateway to unforgettable mountain adventures.</p>
             </div>
             <div>
-              <h4 className="text-white font-bold mb-4">Quick Links</h4>
+              <h4 className="text-white font-black mb-4 text-lg">Quick Links</h4>
               <ul className="text-sm space-y-2">
-                <li><Link href="/treks" className="hover:text-white transition">All Treks</Link></li>
-                <li><Link href="/auth/login" className="hover:text-white transition">Login</Link></li>
-                <li><Link href="/auth/register" className="hover:text-white transition">Sign Up</Link></li>
+                <li><Link href="/treks" className="text-gray-200 hover:text-white transition font-medium">All Treks</Link></li>
+                <li><Link href="/auth/login" className="text-gray-200 hover:text-white transition font-medium">Login</Link></li>
+                <li><Link href="/auth/register" className="text-gray-200 hover:text-white transition font-medium">Sign Up</Link></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-bold mb-4">Contact</h4>
-              <p className="text-sm">Email: ranamadan295@gmail.com</p>
-              <p className="text-sm">Phone: +91-6363710799</p>
+              <h4 className="text-white font-black mb-4 text-lg">Contact</h4>
+              <p className="text-sm text-gray-200">Email: ranamadan295@gmail.com</p>
+              <p className="text-sm text-gray-200">Phone: +91-6363710799</p>
             </div>
             <div>
-              <h4 className="text-white font-bold mb-4">Follow Us</h4>
+              <h4 className="text-white font-black mb-4 text-lg">Follow Us</h4>
               <div className="flex gap-4 text-xl">
                 <a href="#" className="hover:text-white transition">ⓕ</a>
                 <a href="#" className="hover:text-white transition">📷</a>

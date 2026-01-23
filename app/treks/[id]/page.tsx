@@ -250,8 +250,8 @@ export default function TrekDetailPage() {
           ⛰️
         </div>
         <div className="relative text-center text-white max-w-4xl px-4">
-          <h1 className="text-5xl md:text-6xl font-bold mb-4">{trek.title}</h1>
-          <p className="text-xl opacity-90">{trek.location}</p>
+          <h1 className="text-5xl md:text-6xl font-black mb-4">{trek.title}</h1>
+          <p className="text-xl font-semibold">{trek.location}</p>
         </div>
       </section>
 
@@ -341,7 +341,7 @@ export default function TrekDetailPage() {
                     ₹{trek.price.toLocaleString("en-IN")}
                   </span>
                   {trek.original_price && (
-                    <span className="text-lg text-gray-400 line-through">
+                    <span className="text-lg text-gray-700 line-through font-semibold">
                       ₹{trek.original_price.toLocaleString("en-IN")}
                     </span>
                   )}
