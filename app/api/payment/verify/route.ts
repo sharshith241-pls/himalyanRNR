@@ -3,13 +3,31 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import { createClient } from "@/utils/supabase/server";
 
-const razorpayInstance = new Razorpay({
-  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
-  key_secret: process.env.RAZORPAY_KEY_SECRET || "",
-});
+const createRazorpayInstance = () => {
+  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+  if (!keyId || !keySecret) {
+    return null;
+  }
+
+  return new Razorpay({
+    key_id: keyId,
+    key_secret: keySecret,
+  });
+};
+
+const razorpayInstance = createRazorpayInstance();
 
 export async function POST(request: NextRequest) {
   try {
+    if (!razorpayInstance) {
+      return NextResponse.json(
+        { error: "Razorpay is not configured" },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { orderId, razorpayPaymentId, razorpaySignature } = body;
 
@@ -46,8 +64,8 @@ export async function POST(request: NextRequest) {
           razorpay_payment_id: razorpayPaymentId,
           razorpay_signature: razorpaySignature,
           status: "completed",
-          amount: order.amount / 100,
-          currency: order.currency,
+          amount: (order as any).amount / 100,
+          currency: (order as any).currency,
           created_at: new Date(),
         },
       ]);

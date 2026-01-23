@@ -2,13 +2,31 @@ import { NextRequest, NextResponse } from "next/server";
 import Razorpay from "razorpay";
 import crypto from "crypto";
 
-const razorpayInstance = new Razorpay({
-  key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "",
-  key_secret: process.env.RAZORPAY_KEY_SECRET || "",
-});
+const createRazorpayInstance = () => {
+  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+
+  if (!keyId || !keySecret) {
+    return null;
+  }
+
+  return new Razorpay({
+    key_id: keyId,
+    key_secret: keySecret,
+  });
+};
+
+const razorpayInstance = createRazorpayInstance();
 
 export async function POST(request: NextRequest) {
   try {
+    if (!razorpayInstance) {
+      return NextResponse.json(
+        { error: "Razorpay is not configured. Please set RAZORPAY keys in environment variables." },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { trekId, amount, userEmail, userName } = body;
 

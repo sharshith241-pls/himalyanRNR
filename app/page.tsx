@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/utils/supabase/client";
 import Link from "next/link";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
 
 interface Trek {
   id: string;
@@ -14,6 +15,7 @@ interface Trek {
   original_price?: number;
   image_url?: string;
   category: string;
+  description?: string;
 }
 
 const DEMO_TREKS: Trek[] = [
@@ -26,7 +28,7 @@ const DEMO_TREKS: Trek[] = [
     price: 3099,
     original_price: 4000,
     category: "sunrise-treks",
-    image_url: "/trek1.jpg",
+    description: "Perfect for kids to build stamina and confidence",
   },
   {
     id: "2",
@@ -37,7 +39,7 @@ const DEMO_TREKS: Trek[] = [
     price: 1399,
     original_price: 1699,
     category: "sunrise-treks",
-    image_url: "/trek2.jpg",
+    description: "Watch the sunrise from a scenic mountain peak",
   },
   {
     id: "3",
@@ -48,7 +50,7 @@ const DEMO_TREKS: Trek[] = [
     price: 5299,
     original_price: 5799,
     category: "all-treks",
-    image_url: "/trek3.jpg",
+    description: "Experience stunning views and serene landscapes",
   },
   {
     id: "4",
@@ -59,7 +61,7 @@ const DEMO_TREKS: Trek[] = [
     price: 2500,
     original_price: 3200,
     category: "all-treks",
-    image_url: "/trek4.jpg",
+    description: "An introductory camping experience for beginners",
   },
 ];
 
@@ -77,14 +79,24 @@ export default function HomePage() {
   const [filteredTreks, setFilteredTreks] = useState<Trek[]>(DEMO_TREKS);
   const [selectedCategory, setSelectedCategory] = useState("all-treks");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [session, setSession] = useState<any>(null);
+  const { isAdmin } = useAdminCheck();
+
+  useEffect(() => {
+    const getSession = async () => {
+      if (supabase) {
+        const { data } = await supabase.auth.getSession();
+        setSession(data?.session);
+      }
+    };
+    getSession();
+  }, []);
 
   useEffect(() => {
     const fetchTreks = async () => {
       setLoading(true);
       try {
         if (!supabase) {
-          console.log("Using demo data - Supabase not configured");
           setTreks(DEMO_TREKS);
           filterTreks(DEMO_TREKS, "all-treks");
           setLoading(false);
@@ -96,19 +108,16 @@ export default function HomePage() {
           .select("*");
 
         if (queryError) {
-          console.log("Supabase query error, using demo data:", queryError);
           setTreks(DEMO_TREKS);
           filterTreks(DEMO_TREKS, "all-treks");
         } else if (data && data.length > 0) {
           setTreks(data);
           filterTreks(data, "all-treks");
         } else {
-          console.log("No data from Supabase, using demo data");
           setTreks(DEMO_TREKS);
           filterTreks(DEMO_TREKS, "all-treks");
         }
       } catch (err) {
-        console.error("Error fetching treks:", err);
         setTreks(DEMO_TREKS);
         filterTreks(DEMO_TREKS, "all-treks");
       } finally {
@@ -132,143 +141,268 @@ export default function HomePage() {
     filterTreks(treks, categoryId);
   };
 
+  const handleLogout = async () => {
+    if (supabase) {
+      await supabase.auth.signOut();
+      setSession(null);
+      window.location.reload();
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-white">
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(20px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes slideInLeft {
+          from { opacity: 0; transform: translateX(-30px); }
+          to { opacity: 1; transform: translateX(0); }
+        }
+        .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
+        .animate-slide-in { animation: slideInLeft 0.8s ease-out forwards; }
+      `}</style>
+
       {/* Navigation */}
-      <nav className="bg-white shadow-sm sticky top-0 z-50">
+      <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-teal-600">🏔️</h1>
-            <h1 className="text-2xl font-bold text-gray-900">Himalayan Runners</h1>
-          </div>
-          <div className="flex gap-8 items-center">
-            <Link href="/" className="text-gray-700 hover:text-teal-600">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
+            <span className="text-3xl">🏔️</span>
+            <div>
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
+                Himalayan Runners
+              </h1>
+              <p className="text-xs text-gray-600">Adventure Awaits</p>
+            </div>
+          </Link>
+
+          <div className="flex gap-6 items-center">
+            <Link href="/" className="text-gray-700 hover:text-teal-600 font-medium transition">
               Home
             </Link>
-            <Link href="/treks" className="text-gray-700 hover:text-teal-600">
-              Treks
+            <Link href="/treks" className="text-gray-700 hover:text-teal-600 font-medium transition">
+              Explore Treks
             </Link>
-            <Link
-              href="/auth/login"
-              className="text-gray-700 hover:text-teal-600"
-            >
-              Log in
-            </Link>
-            <Link
-              href="/auth/register"
-              className="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700"
-            >
-              Sign up
-            </Link>
+
+            {isAdmin && (
+              <Link href="/admin/treks" className="text-orange-600 hover:text-orange-700 font-bold transition bg-orange-50 px-4 py-2 rounded-lg">
+                🔧 Admin
+              </Link>
+            )}
+
+            {session ? (
+              <div className="flex items-center gap-4">
+                <span className="text-sm text-gray-600 hidden sm:inline">{session.user.email}</span>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition"
+                >
+                  Logout
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link
+                  href="/auth/login"
+                  className="text-gray-700 hover:text-teal-600 font-medium transition"
+                >
+                  Log in
+                </Link>
+                <Link
+                  href="/auth/register"
+                  className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
 
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-teal-50 to-white py-16">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">
-            Explore Treks by Category
-          </h2>
-          <p className="text-gray-600 mb-8">
-            Find your next adventure based on what you love.
-          </p>
+      <section className="relative bg-gradient-to-br from-slate-900 via-teal-900 to-slate-900 text-white py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/5 bg-[size:60px_60px] pointer-events-none" />
+        <div className="relative max-w-7xl mx-auto px-4 text-center">
+          <div className="animate-fade-in space-y-6">
+            <h2 className="text-5xl md:text-7xl font-bold">
+              Explore the Himalayas
+            </h2>
+            <p className="text-xl text-teal-100 max-w-2xl mx-auto">
+              Discover breathtaking mountain trails, connect with nature, and create unforgettable memories with Himalayan Runners
+            </p>
+            <div className="flex gap-4 justify-center flex-wrap">
+              <Link
+                href="/treks"
+                className="bg-white text-teal-600 px-8 py-4 rounded-lg font-bold hover:shadow-2xl transition transform hover:scale-105"
+              >
+                Start Exploring
+              </Link>
+              <Link
+                href="#treks"
+                className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white hover:text-teal-600 transition"
+              >
+                Learn More
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
 
-          {/* Category Filters */}
+      {/* Features Section */}
+      <section className="py-16 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4">
+          <h3 className="text-3xl font-bold text-center mb-12">Why Choose Himalayan Runners?</h3>
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              { icon: "🏆", title: "Expert Guides", desc: "Experienced mountain guides with years of expertise" },
+              { icon: "🛡️", title: "Safe & Secure", desc: "Top-notch safety equipment and protocols" },
+              { icon: "👥", title: "Community", desc: "Join thousands of adventure enthusiasts" },
+            ].map((feature, i) => (
+              <div key={i} className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-1">
+                <div className="text-4xl mb-4">{feature.icon}</div>
+                <h4 className="text-xl font-bold mb-2">{feature.title}</h4>
+                <p className="text-gray-600">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Category Filters */}
+      <section id="treks" className="py-16">
+        <div className="max-w-7xl mx-auto px-4">
+          <h2 className="text-4xl font-bold text-center mb-12">Explore by Category</h2>
+
           <div className="flex flex-wrap justify-center gap-3 mb-12">
             {CATEGORIES.map((category) => (
               <button
                 key={category.id}
                 onClick={() => handleCategoryChange(category.id)}
-                className={`px-6 py-2 rounded-full font-medium transition ${
+                className={`px-6 py-3 rounded-full font-semibold transition transform hover:scale-105 ${
                   selectedCategory === category.id
-                    ? "bg-teal-600 text-white"
-                    : "bg-white text-gray-700 border border-gray-300 hover:border-teal-600"
+                    ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-lg"
+                    : "bg-white text-gray-700 border-2 border-gray-200 hover:border-teal-500"
                 }`}
               >
                 {category.icon} {category.name}
               </button>
             ))}
           </div>
+
+          {/* Treks Grid */}
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="inline-block animate-spin text-4xl mb-4">⏳</div>
+              <p className="text-gray-600">Loading amazing treks...</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {filteredTreks.map((trek) => (
+                <Link
+                  key={trek.id}
+                  href={`/treks/${trek.id}`}
+                  className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-2xl transition transform hover:-translate-y-2"
+                >
+                  {/* Image */}
+                  <div className="relative bg-gradient-to-br from-teal-300 to-blue-300 h-48 flex items-center justify-center overflow-hidden">
+                    <div className="absolute inset-0 group-hover:scale-110 transition duration-300">
+                      <span className="text-6xl flex items-center justify-center h-full">⛰️</span>
+                    </div>
+                    <span className="absolute top-3 left-3 bg-teal-600 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
+                      {trek.category.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
+                    </span>
+                  </div>
+
+                  {/* Info */}
+                  <div className="p-4">
+                    <h3 className="font-bold text-lg text-gray-900 mb-3 line-clamp-2 group-hover:text-teal-600 transition">
+                      {trek.title}
+                    </h3>
+
+                    <div className="space-y-2 text-sm text-gray-600 mb-4">
+                      <div className="flex items-center gap-2">
+                        <span>📍</span> {trek.location}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span>⏱️</span> {trek.duration}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span>📈</span> {trek.difficulty}
+                      </div>
+                    </div>
+
+                    {/* Price */}
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="text-2xl font-bold text-teal-600">
+                        ₹{trek.price.toLocaleString("en-IN")}
+                      </span>
+                      {trek.original_price && (
+                        <span className="text-sm text-gray-500 line-through">
+                          ₹{trek.original_price.toLocaleString("en-IN")}
+                        </span>
+                      )}
+                    </div>
+
+                    <button className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white py-2 rounded-lg group-hover:shadow-lg transition font-semibold">
+                      View Details
+                    </button>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
-      {/* Treks Grid */}
-      <section className="max-w-7xl mx-auto px-4 py-16">
-        {loading ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600">Loading treks...</p>
-          </div>
-        ) : error ? (
-          <div className="text-center py-12">
-            <p className="text-red-600">{error}</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {filteredTreks.map((trek) => (
-              <Link
-                key={trek.id}
-                href={`/treks/${trek.id}`}
-                className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-lg transition transform hover:-translate-y-1"
-              >
-                {/* Trek Image */}
-                <div className="relative bg-gradient-to-br from-teal-200 to-blue-200 h-48 flex items-center justify-center">
-                  <div className="absolute top-3 left-3 bg-teal-600 text-white px-3 py-1 rounded-full text-xs font-semibold">
-                    {trek.category
-                      .split("-")
-                      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-                      .join(" ")}
-                  </div>
-                  <span className="text-6xl">🏔️</span>
-                </div>
-
-                {/* Trek Info */}
-                <div className="p-4">
-                  <h3 className="font-bold text-gray-900 mb-2 line-clamp-2">
-                    {trek.title}
-                  </h3>
-
-                  <div className="space-y-2 text-sm text-gray-600 mb-4">
-                    <div className="flex items-center gap-2">
-                      <span>📍</span>
-                      <span>{trek.location}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span>⏱️</span>
-                      <span>{trek.duration}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span>📈</span>
-                      <span>{trek.difficulty}</span>
-                    </div>
-                  </div>
-
-                  {/* Price */}
-                  <div className="flex items-center gap-2 mb-4">
-                    <span className="text-xl font-bold text-teal-600">
-                      ₹{trek.price}
-                    </span>
-                    {trek.original_price && (
-                      <span className="text-sm text-gray-500 line-through">
-                        ₹{trek.original_price}
-                      </span>
-                    )}
-                  </div>
-
-                  <button className="w-full bg-teal-600 text-white py-2 rounded-lg hover:bg-teal-700 transition font-medium">
-                    Enquire Now
-                  </button>
-                </div>
-              </Link>
-            ))}
-          </div>
-        )}
+      {/* CTA Section */}
+      <section className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white py-16">
+        <div className="max-w-7xl mx-auto px-4 text-center">
+          <h2 className="text-4xl font-bold mb-4">Ready for Your Adventure?</h2>
+          <p className="text-lg mb-8 opacity-90">Join thousands of trekkers who have experienced the magic of the Himalayas</p>
+          <Link
+            href="/treks"
+            className="inline-block bg-white text-teal-600 px-8 py-4 rounded-lg font-bold hover:shadow-2xl transition transform hover:scale-105"
+          >
+            Explore All Treks
+          </Link>
+        </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-300 py-8 mt-16">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-          <p>&copy; 2025 Himalayan Runners. All rights reserved.</p>
+      <footer className="bg-gray-900 text-gray-300 py-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="grid md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h4 className="text-white font-bold mb-4">Himalayan Runners</h4>
+              <p className="text-sm">Your gateway to unforgettable mountain adventures.</p>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-4">Quick Links</h4>
+              <ul className="text-sm space-y-2">
+                <li><Link href="/treks" className="hover:text-white transition">All Treks</Link></li>
+                <li><Link href="/auth/login" className="hover:text-white transition">Login</Link></li>
+                <li><Link href="/auth/register" className="hover:text-white transition">Sign Up</Link></li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-4">Contact</h4>
+              <p className="text-sm">Email: info@himalayans.com</p>
+              <p className="text-sm">Phone: +91-9876543210</p>
+            </div>
+            <div>
+              <h4 className="text-white font-bold mb-4">Follow Us</h4>
+              <div className="flex gap-4 text-xl">
+                <a href="#" className="hover:text-white transition">📘</a>
+                <a href="#" className="hover:text-white transition">📷</a>
+                <a href="#" className="hover:text-white transition">🐦</a>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-700 pt-8 text-center text-sm">
+            <p>&copy; 2024 Himalayan Runners. All rights reserved.</p>
+          </div>
         </div>
       </footer>
     </div>

@@ -86,8 +86,8 @@ export default function CheckoutButton({
         razorpay.open();
       });
 
-      if (response.success) {
-        onSuccess?.(response.data);
+      if ((response as any).success) {
+        onSuccess?.((response as any).data);
       }
     } catch (err: any) {
       const errorMessage = err.message || "Payment failed";
