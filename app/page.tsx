@@ -388,20 +388,20 @@ export default function HomePage() {
             </div>
             <div>
               <h4 className="text-white font-bold mb-4">Contact</h4>
-              <p className="text-sm">Email: info@himalayans.com</p>
-              <p className="text-sm">Phone: +91-9876543210</p>
+              <p className="text-sm">Email: ranamadan295@gmail.com</p>
+              <p className="text-sm">Phone: +91-6363710799</p>
             </div>
             <div>
               <h4 className="text-white font-bold mb-4">Follow Us</h4>
               <div className="flex gap-4 text-xl">
-                <a href="#" className="hover:text-white transition">📘</a>
+                <a href="#" className="hover:text-white transition">ⓕ</a>
                 <a href="#" className="hover:text-white transition">📷</a>
                 <a href="#" className="hover:text-white transition">🐦</a>
               </div>
             </div>
           </div>
           <div className="border-t border-gray-700 pt-8 text-center text-sm">
-            <p>&copy; 2024 Himalayan Runners. All rights reserved.</p>
+            <p>&copy; 2025 Himalayan Runners. All rights reserved.</p>
           </div>
         </div>
       </footer>
