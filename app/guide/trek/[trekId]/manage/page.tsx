@@ -17,6 +17,7 @@ interface Trek {
   title: string;
   location: string;
   guide_email?: string;
+  image_url?: string;
 }
 
 export default function GuideManageTrek() {
@@ -86,7 +87,7 @@ export default function GuideManageTrek() {
 
   const handleAddItinerary = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.title || !formData.description || !trekId) {
+    if (!formData.title || !formData.description || !trekId || !supabase) {
       setError("All fields are required");
       return;
     }
@@ -123,6 +124,10 @@ export default function GuideManageTrek() {
 
   const handleDeleteItinerary = async (id: string) => {
     if (!confirm("Are you sure you want to delete this itinerary item?")) return;
+    if (!supabase) {
+      setError("Supabase client is not initialized");
+      return;
+    }
 
     try {
       const { error: deleteError } = await supabase
@@ -145,7 +150,7 @@ export default function GuideManageTrek() {
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !trekId) return;
+    if (!file || !trekId || !supabase) return;
 
     try {
       setUploadingImage(true);
