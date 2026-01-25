@@ -426,7 +426,7 @@ export default function HomePage() {
                   </svg>
                 </a>
                 <a 
-                  href="https://www.instagram.com/himalayanrunners?igsh=c2F0Z2V0bXl3OHFh" 
+                  href="https://www.instagram.com/himalayanrunners" 
                   target="_blank" 
                   rel="noopener noreferrer"
                   className="w-10 h-10 bg-gradient-to-r from-pink-500 to-orange-500 hover:shadow-lg rounded-full flex items-center justify-center transition transform hover:scale-110"
