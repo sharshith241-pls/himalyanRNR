@@ -167,10 +167,26 @@ export default function HomePage() {
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
-            <span className="text-3xl">🏔️</span>
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
+            <div className="w-10 h-10 flex-shrink-0">
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                <defs>
+                  <linearGradient id="logoOrange" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style={{stopColor:"#FF9500",stopOpacity:1}} />
+                    <stop offset="100%" style={{stopColor:"#FF7500",stopOpacity:1}} />
+                  </linearGradient>
+                  <linearGradient id="logoGreen" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style={{stopColor:"#1B7F5F",stopOpacity:1}} />
+                    <stop offset="100%" style={{stopColor:"#0F6B52",stopOpacity:1}} />
+                  </linearGradient>
+                </defs>
+                <path d="M 30 50 L 30 130 M 50 50 L 50 130 M 30 90 L 50 90" fill="none" stroke="url(#logoOrange)" strokeWidth="6" strokeLinecap="round"/>
+                <path d="M 65 50 L 65 130 M 85 50 L 85 130 M 65 90 L 85 90 M 85 90 L 100 130" fill="none" stroke="url(#logoGreen)" strokeWidth="6" strokeLinecap="round"/>
+                <polygon points="115,130 145,60 175,130" fill="url(#logoOrange)" opacity="0.9"/>
+              </svg>
+            </div>
             <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-teal-600 bg-clip-text text-transparent">
                 Himalayan Runners
               </h1>
               <p className="text-xs text-gray-600">Adventure Awaits</p>
@@ -190,6 +206,10 @@ export default function HomePage() {
                 🔧 Admin
               </Link>
             )}
+
+            <Link href="/guide/login" className="text-teal-700 hover:text-teal-800 font-bold transition bg-teal-50 px-4 py-2 rounded-lg" title="Guide Portal">
+              👨 Guide Portal
+            </Link>
 
             {session ? (
               <div className="flex items-center gap-4">
@@ -393,10 +413,29 @@ export default function HomePage() {
             </div>
             <div>
               <h4 className="text-white font-black mb-4 text-lg">Follow Us</h4>
-              <div className="flex gap-4 text-xl">
-                <a href="#" className="hover:text-white transition">ⓕ</a>
-                <a href="#" className="hover:text-white transition">📷</a>
-                <a href="#" className="hover:text-white transition">🐦</a>
+              <div className="flex gap-4">
+                <a 
+                  href="https://www.facebook.com/1508234205942047" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition transform hover:scale-110"
+                  title="Follow us on Facebook"
+                >
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5c-.563-.074-2.324-.216-4.495-.216-4.814 0-7.115 2.993-7.115 8.499v2.817z" />
+                  </svg>
+                </a>
+                <a 
+                  href="https://www.instagram.com/himalayanrunners?igsh=c2F0Z2V0bXl3OHFh" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="w-10 h-10 bg-gradient-to-r from-pink-500 to-orange-500 hover:shadow-lg rounded-full flex items-center justify-center transition transform hover:scale-110"
+                  title="Follow us on Instagram"
+                >
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.69.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1 1 12.324 0 6.162 6.162 0 0 1-12.324 0zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm4.965-10.322a1.44 1.44 0 1 1 2.881.001 1.44 1.44 0 0 1-2.881-.001z" />
+                  </svg>
+                </a>
               </div>
             </div>
           </div>

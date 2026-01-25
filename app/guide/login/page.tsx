@@ -3,31 +3,22 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { signUp } from "@/utils/auth/actions";
-import { validateEmail, validatePassword } from "@/utils/auth/helpers";
+import { signIn } from "@/utils/auth/actions";
+import { validateEmail } from "@/utils/auth/helpers";
 
-export default function RegisterPage() {
+export default function GuideLoginPage() {
   const router = useRouter();
-  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     setSuccess("");
-
-    // Client-side validation
-    if (!fullName.trim()) {
-      setError("Full name is required");
-      return;
-    }
 
     if (!email.trim()) {
       setError("Email is required");
@@ -39,14 +30,8 @@ export default function RegisterPage() {
       return;
     }
 
-    const passwordError = validatePassword(password);
-    if (passwordError) {
-      setError(passwordError);
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
+    if (!password) {
+      setError("Password is required");
       return;
     }
 
@@ -54,21 +39,18 @@ export default function RegisterPage() {
 
     try {
       const formData = new FormData();
-      formData.append("fullName", fullName);
       formData.append("email", email);
       formData.append("password", password);
 
-      const result = await signUp(formData);
+      const result = await signIn(formData);
 
       if (result.success) {
-        setSuccess(result.message || "Account created successfully!");
-        setFullName("");
-        setEmail("");
-        setPassword("");
-        setConfirmPassword("");
-        setTimeout(() => router.push("/auth/login"), 2000);
+        setSuccess("Login successful! Redirecting...");
+        // Store guide email for verification
+        localStorage.setItem("guideEmail", email);
+        setTimeout(() => router.push("/guide/dashboard"), 1500);
       } else {
-        setError(result.error || "Registration failed");
+        setError(result.error || "Login failed");
       }
     } catch (err) {
       setError("An unexpected error occurred");
@@ -78,7 +60,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4 py-12">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <style>{`
         @keyframes slideIn {
           from { opacity: 0; transform: translateY(-20px); }
@@ -94,19 +76,13 @@ export default function RegisterPage() {
           <div className="text-center mb-8">
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-500 to-teal-600 rounded-full mb-4 shadow-lg">
               <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-white">
-                <defs>
-                  <linearGradient id="logoOrange2" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style={{stopColor:"#FFFFFF",stopOpacity:1}} />
-                    <stop offset="100%" style={{stopColor:"#FFFFFF",stopOpacity:1}} />
-                  </linearGradient>
-                </defs>
-                <text x="100" y="130" fontSize="80" fontWeight="bold" textAnchor="middle" fill="white">HR</text>
+                <text x="100" y="130" fontSize="80" fontWeight="bold" textAnchor="middle" fill="white">👨</text>
               </svg>
             </div>
             <h1 className="text-3xl font-bold text-gray-900">
-              Create Account
+              Guide Portal
             </h1>
-            <p className="text-gray-600 mt-2">Join Himalayan Runners</p>
+            <p className="text-gray-600 mt-2">Login to manage your treks</p>
           </div>
 
           {error && (
@@ -125,30 +101,15 @@ export default function RegisterPage() {
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label htmlFor="fullName" className="block text-sm font-semibold text-gray-800 mb-2">
-                Full Name
-              </label>
-              <input
-                id="fullName"
-                type="text"
-                placeholder="John Doe"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                disabled={loading}
-                className="input-field w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:border-orange-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
-              />
-            </div>
-
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
               <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-2">
-                Email Address
+                Guide Email Address
               </label>
               <input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="guide@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={loading}
@@ -158,7 +119,7 @@ export default function RegisterPage() {
 
             <div>
               <label htmlFor="password" className="block text-sm font-semibold text-gray-800 mb-2">
-                Password <span className="text-xs text-gray-500">(min 8 characters)</span>
+                Password
               </label>
               <div className="relative">
                 <input
@@ -180,47 +141,28 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div>
-              <label htmlFor="confirmPassword" className="block text-sm font-semibold text-gray-800 mb-2">
-                Confirm Password
-              </label>
-              <div className="relative">
-                <input
-                  id="confirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  placeholder="••••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  disabled={loading}
-                  className="input-field w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:border-orange-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed pr-12"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-3 top-3.5 text-gray-400 hover:text-gray-600 transition"
-                >
-                  {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
-                </button>
-              </div>
-            </div>
-
             <button
               type="submit"
               disabled={loading}
               className="w-full bg-gradient-to-r from-orange-500 to-teal-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
             >
-              {loading ? "Creating Account..." : "Create Account"}
+              {loading ? "Signing in..." : "Guide Sign In"}
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-600">
-            Already have an account?{" "}
-            <Link
-              href="/auth/login"
-              className="text-orange-600 hover:text-orange-700 font-bold transition"
-            >
-              Sign In
-            </Link>
+          <div className="mt-6 space-y-3 text-center">
+            <div className="text-sm text-gray-600">
+              Back to{" "}
+              <Link
+                href="/"
+                className="text-orange-600 hover:text-orange-700 font-bold transition"
+              >
+                Home
+              </Link>
+            </div>
+            <div className="text-xs text-gray-500 border-t pt-3">
+              <p>⚠️ Guide credentials are managed by administrators only.</p>
+            </div>
           </div>
         </div>
       </div>

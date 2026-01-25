@@ -25,6 +25,25 @@ export async function signUp(formData: FormData) {
       return { success: false, error: getErrorMessage(error) };
     }
 
+    // Save user profile to the database
+    if (data.user) {
+      const { error: profileError } = await supabase
+        .from("user_profiles")
+        .insert([
+          {
+            id: data.user.id,
+            email: email,
+            full_name: fullName,
+            created_at: new Date().toISOString(),
+          },
+        ]);
+
+      if (profileError) {
+        console.error("Error saving profile:", profileError);
+        // Don't fail signup if profile save fails, but log it
+      }
+    }
+
     return {
       success: true,
       message: "Account created! Please check your email to confirm.",

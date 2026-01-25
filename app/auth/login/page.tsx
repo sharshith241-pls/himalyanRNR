@@ -58,38 +58,32 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-teal-900 to-slate-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <style>{`
         @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateY(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(-20px); }
+          to { opacity: 1; transform: translateY(0); }
         }
-        .animate-slide-in {
-          animation: slideIn 0.6s ease-out forwards;
-        }
-        .input-field {
-          transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .input-field:focus {
-          box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1), 0 0 0 1px rgba(16, 185, 129, 0.8);
-        }
+        .animate-slide-in { animation: slideIn 0.6s ease-out forwards; }
+        .input-field { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .input-field:focus { box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.1), 0 0 0 1px rgba(255, 149, 0, 0.8); }
       `}</style>
 
       <div className="w-full max-w-md animate-slide-in">
-        <div className="absolute inset-0 bg-gradient-to-r from-teal-500 to-emerald-500 rounded-2xl blur-2xl opacity-20 -z-10" />
-
-        <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl p-8 border border-white/20">
+        <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full mb-4 shadow-lg">
-              <span className="text-2xl">🏔️</span>
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-500 to-teal-600 rounded-full mb-4 shadow-lg">
+              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-white">
+                <defs>
+                  <linearGradient id="logoOrange3" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style={{stopColor:"#FFFFFF",stopOpacity:1}} />
+                    <stop offset="100%" style={{stopColor:"#FFFFFF",stopOpacity:1}} />
+                  </linearGradient>
+                </defs>
+                <text x="100" y="130" fontSize="80" fontWeight="bold" textAnchor="middle" fill="white">HR</text>
+              </svg>
             </div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
+            <h1 className="text-3xl font-bold text-gray-900">
               Himalayan Runners
             </h1>
             <p className="text-gray-600 mt-2">Welcome back, explorer!</p>
@@ -112,26 +106,23 @@ export default function LoginPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div className="group">
-              <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+            <div>
+              <label htmlFor="email" className="block text-sm font-semibold text-gray-800 mb-2">
                 Email Address
               </label>
-              <div className="relative">
-                <input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={loading}
-                  className="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-teal-500 focus:outline-none bg-white/50 disabled:opacity-50 disabled:cursor-not-allowed"
-                />
-                <span className="absolute right-3 top-3.5 text-gray-400">✉️</span>
-              </div>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                disabled={loading}
+                className="input-field w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:border-orange-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
+              />
             </div>
 
-            <div className="group">
-              <label htmlFor="password" className="block text-sm font-semibold text-gray-700 mb-2">
+            <div>
+              <label htmlFor="password" className="block text-sm font-semibold text-gray-800 mb-2">
                 Password
               </label>
               <div className="relative">
@@ -142,7 +133,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   disabled={loading}
-                  className="input-field w-full px-4 py-3 border-2 border-gray-200 rounded-lg text-gray-900 placeholder-gray-400 focus:border-teal-500 focus:outline-none bg-white/50 disabled:opacity-50 disabled:cursor-not-allowed pr-12"
+                  className="input-field w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-900 placeholder-gray-400 focus:border-orange-500 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed pr-12"
                 />
                 <button
                   type="button"
@@ -157,32 +148,16 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg hover:shadow-teal-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
+              className="w-full bg-gradient-to-r from-orange-500 to-teal-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300"
             >
-              {loading ? (
-                <>
-                  <span className="inline-block animate-spin">⏳</span>
-                  Signing in...
-                </>
-              ) : (
-                <>
-                  <span>🔓</span>
-                  Sign In
-                </>
-              )}
+              {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
-          <div className="my-6 flex items-center gap-3">
-            <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-gray-500 text-sm">or</span>
-            <div className="flex-1 h-px bg-gray-200" />
-          </div>
-
-          <div className="space-y-3 text-center">
+          <div className="mt-6 space-y-3 text-center">
             <Link
               href="/auth/forgot-password"
-              className="block text-sm text-teal-600 hover:text-teal-700 font-medium transition hover:underline"
+              className="block text-sm text-orange-600 hover:text-orange-700 font-medium transition"
             >
               Forgot password?
             </Link>
@@ -190,7 +165,7 @@ export default function LoginPage() {
               Don&apos;t have an account?{" "}
               <Link
                 href="/auth/register"
-                className="text-teal-600 hover:text-teal-700 font-bold transition hover:underline"
+                className="text-orange-600 hover:text-orange-700 font-bold transition"
               >
                 Create one now
               </Link>
