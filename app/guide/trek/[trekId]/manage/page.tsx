@@ -40,16 +40,28 @@ export default function GuideManageTrek() {
   const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
-    const email = localStorage.getItem("guideEmail");
-    if (!email) {
-      router.push("/guide/login");
-      return;
-    }
-    setGuideEmail(email);
-    fetchTrekData(email);
+    const init = async () => {
+      if (!supabase) {
+        router.push("/guide/login");
+        return;
+      }
+
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session;
+      if (!session) {
+        router.push("/guide/login");
+        return;
+      }
+
+      const userId = session.user.id;
+      setGuideEmail(session.user.email || "");
+      await fetchTrekDataByUserId(userId);
+    };
+
+    init();
   }, [router, trekId]);
 
-  const fetchTrekData = async (email: string) => {
+  const fetchTrekDataByUserId = async (userId: string) => {
     try {
       setLoading(true);
       if (!supabase || !trekId) return;
@@ -58,7 +70,7 @@ export default function GuideManageTrek() {
         .from("treks")
         .select("*")
         .eq("id", trekId)
-        .eq("guide_email", email)
+        .eq("guide_id", userId)
         .single();
 
       if (trekError || !trekData) {
