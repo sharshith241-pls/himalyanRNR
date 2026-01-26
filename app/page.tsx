@@ -189,9 +189,7 @@ export default function HomePage() {
               </Link>
             )}
 
-            <Link href="/guide/login" className="text-teal-700 hover:text-teal-800 font-bold transition bg-teal-50 px-4 py-2 rounded-lg" title="Guide Portal">
-              👨 Guide Portal
-            </Link>
+            {/* Guide Portal link removed from landing page header */}
 
             {session ? (
               <div className="flex items-center gap-4">
