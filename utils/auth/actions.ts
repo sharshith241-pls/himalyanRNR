@@ -25,10 +25,10 @@ export async function signUp(formData: FormData) {
       return { success: false, error: getErrorMessage(error) };
     }
 
-    // Save user profile to the database
+    // Save user profile to the `profiles` table (role defaults to 'user')
     if (data.user) {
       const { error: profileError } = await supabase
-        .from("user_profiles")
+        .from("profiles")
         .insert([
           {
             id: data.user.id,
@@ -60,7 +60,7 @@ export async function signIn(formData: FormData) {
   try {
     const supabase = await createClient();
 
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
@@ -69,7 +69,22 @@ export async function signIn(formData: FormData) {
       return { success: false, error: getErrorMessage(error) };
     }
 
-    return { success: true };
+    // After successful sign in, fetch profile role and approved status
+    const userId = data?.user?.id;
+    if (!userId) return { success: true };
+
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("role, approved")
+      .eq("id", userId)
+      .single();
+
+    if (profileError) {
+      // if profile not found, default to regular user
+      return { success: true, role: "user" };
+    }
+
+    return { success: true, role: profileData?.role || "user", approved: profileData?.approved || false };
   } catch (error) {
     return { success: false, error: getErrorMessage(error) };
   }

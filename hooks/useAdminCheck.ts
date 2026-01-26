@@ -27,14 +27,14 @@ export const useAdminCheck = () => {
           return;
         }
 
-        // Check if user is admin (you can add a role field in user_profiles)
+        // Check role in `profiles` table
         const { data } = await supabase
-          .from("user_profiles")
-          .select("is_admin")
+          .from("profiles")
+          .select("role")
           .eq("id", session.user.id)
           .single();
 
-        setIsAdmin(data?.is_admin || false);
+        setIsAdmin(data?.role === "admin");
       } catch (error) {
         console.error("Error checking admin status:", error);
         setIsAdmin(false);

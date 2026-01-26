@@ -9,7 +9,7 @@ interface Trek {
   id: string;
   title: string;
   location: string;
-  guide_email?: string;
+  guide_id?: string;
 }
 
 interface Booking {
@@ -32,16 +32,28 @@ export default function GuideDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
-    const email = localStorage.getItem("guideEmail");
-    if (!email) {
-      router.push("/guide/login");
-      return;
-    }
-    setGuideEmail(email);
-    fetchGuideTreks(email);
+    const init = async () => {
+      if (!supabase) {
+        router.push('/guide/login');
+        return;
+      }
+
+      const { data } = await supabase.auth.getSession();
+      const session = data?.session;
+      if (!session) {
+        router.push('/guide/login');
+        return;
+      }
+
+      const userId = session.user.id;
+      setGuideEmail(session.user.email || '');
+      fetchGuideTreksByUserId(userId);
+    };
+
+    init();
   }, [router]);
 
-  const fetchGuideTreks = async (email: string) => {
+  const fetchGuideTreksByUserId = async (userId: string) => {
     try {
       setLoading(true);
       if (!supabase) {
@@ -52,7 +64,7 @@ export default function GuideDashboard() {
       const { data: treks, error: treksError } = await supabase
         .from("treks")
         .select("*")
-        .eq("guide_email", email);
+        .eq("guide_id", userId);
 
       if (treksError) {
         console.error("Error fetching treks:", treksError);
@@ -64,11 +76,11 @@ export default function GuideDashboard() {
         }
       }
 
-      // Fetch all bookings for this guide's treks
+      // Fetch all registrations for this guide's treks
       if (treks && treks.length > 0) {
         const trekIds = treks.map((t) => t.id);
         const { data: bookingsData, error: bookingsError } = await supabase
-          .from("bookings")
+          .from("registrations")
           .select("*")
           .in("trek_id", trekIds);
 

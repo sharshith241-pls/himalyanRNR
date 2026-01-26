@@ -167,30 +167,12 @@ export default function HomePage() {
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
-            <div className="w-10 h-10 flex-shrink-0">
-              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-                <defs>
-                  <linearGradient id="logoOrange" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style={{stopColor:"#FF9500",stopOpacity:1}} />
-                    <stop offset="100%" style={{stopColor:"#FF7500",stopOpacity:1}} />
-                  </linearGradient>
-                  <linearGradient id="logoGreen" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style={{stopColor:"#1B7F5F",stopOpacity:1}} />
-                    <stop offset="100%" style={{stopColor:"#0F6B52",stopOpacity:1}} />
-                  </linearGradient>
-                </defs>
-                <path d="M 30 50 L 30 130 M 50 50 L 50 130 M 30 90 L 50 90" fill="none" stroke="url(#logoOrange)" strokeWidth="6" strokeLinecap="round"/>
-                <path d="M 65 50 L 65 130 M 85 50 L 85 130 M 65 90 L 85 90 M 85 90 L 100 130" fill="none" stroke="url(#logoGreen)" strokeWidth="6" strokeLinecap="round"/>
-                <polygon points="115,130 145,60 175,130" fill="url(#logoOrange)" opacity="0.9"/>
-              </svg>
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-600 to-teal-600 bg-clip-text text-transparent">
-                Himalayan Runners
-              </h1>
-              <p className="text-xs text-gray-600">Adventure Awaits</p>
-            </div>
+          <Link href="/" className="flex items-center hover:opacity-80 transition">
+            <img 
+              src="/logo.svg" 
+              alt="Himalayan Runners Logo" 
+              className="h-12 w-auto"
+            />
           </Link>
 
           <div className="flex gap-6 items-center">

@@ -46,7 +46,16 @@ export default function LoginPage() {
 
       if (result.success) {
         setSuccess("Login successful! Redirecting...");
-        setTimeout(() => router.push("/"), 1500);
+        // Redirect based on role/approved returned from server
+        const role = (result as any).role || 'user';
+        const approved = (result as any).approved || false;
+
+        setTimeout(() => {
+          if (role === 'admin') router.push('/admin/dashboard');
+          else if (role === 'guide' && approved) router.push('/guide/dashboard');
+          else if (role === 'guide' && !approved) router.push('/pending-approval');
+          else router.push('/');
+        }, 800);
       } else {
         setError(result.error || "Login failed");
       }
