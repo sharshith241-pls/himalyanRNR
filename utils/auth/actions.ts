@@ -25,7 +25,7 @@ export async function signUp(formData: FormData) {
       return { success: false, error: getErrorMessage(error) };
     }
 
-    // Save user profile to the `profiles` table (role defaults to 'user')
+    // Save user profile to the `profiles` table (explicit role: 'user')
     if (data.user) {
       const { error: profileError } = await supabase
         .from("profiles")
@@ -34,6 +34,7 @@ export async function signUp(formData: FormData) {
             id: data.user.id,
             email: email,
             full_name: fullName,
+            role: 'user',
             created_at: new Date().toISOString(),
           },
         ]);
@@ -60,6 +61,8 @@ export async function signIn(formData: FormData) {
   try {
     const supabase = await createClient();
 
+    const requestedRole = (formData.get("role") as string) || undefined;
+
     const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
@@ -82,6 +85,11 @@ export async function signIn(formData: FormData) {
     if (profileError) {
       // if profile not found, default to regular user
       return { success: true, role: "user" };
+    }
+
+    // If the client specifically requested an admin sign-in, enforce it server-side
+    if (requestedRole === "admin" && profileData?.role !== "admin") {
+      return { success: false, error: "This account is not an admin." };
     }
 
     return { success: true, role: profileData?.role || "user", approved: profileData?.approved || false };

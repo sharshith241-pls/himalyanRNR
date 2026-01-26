@@ -14,6 +14,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [selectedRole, setSelectedRole] = useState("user");
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -41,6 +42,7 @@ export default function LoginPage() {
       const formData = new FormData();
       formData.append("email", email);
       formData.append("password", password);
+      formData.append("role", selectedRole);
 
       const result = await signIn(formData);
 
@@ -51,8 +53,14 @@ export default function LoginPage() {
         const approved = (result as any).approved || false;
 
         setTimeout(() => {
-          if (role === 'admin') router.push('/admin/dashboard');
-          else if (role === 'guide' && approved) router.push('/guide/dashboard');
+          if (selectedRole === 'admin') {
+            // User explicitly requested admin sign-in — server enforces this
+            if (role === 'admin') router.push('/admin/dashboard');
+            else setError('This account is not an admin');
+          } else if (role === 'admin') {
+            // Admin account signed in but user selected normal login — still allow
+            router.push('/admin/dashboard');
+          } else if (role === 'guide' && approved) router.push('/guide/dashboard');
           else if (role === 'guide' && !approved) router.push('/pending-approval');
           else router.push('/');
         }, 800);
@@ -96,6 +104,22 @@ export default function LoginPage() {
               Himalayan Runners
             </h1>
             <p className="text-gray-600 mt-2">Welcome back, explorer!</p>
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="role" className="block text-sm font-semibold text-gray-800 mb-2">
+              Sign in as
+            </label>
+            <select
+              id="role"
+              value={selectedRole}
+              onChange={(e) => setSelectedRole(e.target.value)}
+              disabled={loading}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none"
+            >
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
           </div>
 
           {error && (
