@@ -44,6 +44,7 @@ export async function signUp(formData: FormData) {
 
         if (profileError) {
           console.error("Error saving profile with service role:", profileError);
+          return { success: false, error: getErrorMessage(profileError) };
         }
       } catch (err) {
         // If service-role is not configured, fall back to best-effort insert with the current client.
@@ -62,6 +63,7 @@ export async function signUp(formData: FormData) {
 
         if (profileError) {
           console.error("Error saving profile with fallback client:", profileError);
+          return { success: false, error: "Database error saving new user. Ensure SUPABASE_SERVICE_ROLE_KEY is set on the server." };
         }
       }
     }
