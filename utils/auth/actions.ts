@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/utils/supabase/server";
+import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 import { getErrorMessage } from "./helpers";
 
 export async function signUp(formData: FormData) {
@@ -26,22 +26,43 @@ export async function signUp(formData: FormData) {
     }
 
     // Save user profile to the `profiles` table (explicit role: 'user')
+    // Use the service-role client for this insert so RLS does not block it.
     if (data.user) {
-      const { error: profileError } = await supabase
-        .from("profiles")
-        .insert([
-          {
-            id: data.user.id,
-            email: email,
-            full_name: fullName,
-            role: 'user',
-            created_at: new Date().toISOString(),
-          },
-        ]);
+      try {
+        const admin = createServiceRoleClient();
+        const { error: profileError } = await admin
+          .from("profiles")
+          .insert([
+            {
+              id: data.user.id,
+              email: email,
+              full_name: fullName,
+              role: 'user',
+              created_at: new Date().toISOString(),
+            },
+          ]);
 
-      if (profileError) {
-        console.error("Error saving profile:", profileError);
-        // Don't fail signup if profile save fails, but log it
+        if (profileError) {
+          console.error("Error saving profile with service role:", profileError);
+        }
+      } catch (err) {
+        // If service-role is not configured, fall back to best-effort insert with the current client.
+        console.error("Service role insert failed or not configured, falling back to regular client:", err);
+        const { error: profileError } = await supabase
+          .from("profiles")
+          .insert([
+            {
+              id: data.user.id,
+              email: email,
+              full_name: fullName,
+              role: 'user',
+              created_at: new Date().toISOString(),
+            },
+          ]);
+
+        if (profileError) {
+          console.error("Error saving profile with fallback client:", profileError);
+        }
       }
     }
 

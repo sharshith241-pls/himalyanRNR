@@ -28,3 +28,11 @@ export const supabase =
   supabaseUrl && supabaseAnonKey
     ? createBrowserClient(supabaseUrl, supabaseAnonKey)
     : null;
+
+if (typeof window !== "undefined" && supabaseUrl) {
+  // Temporary debug: print only the URL (never the anon key) so we can confirm
+  // which Supabase domain the browser-side bundle is using.
+  // Remove this after debugging.
+  // eslint-disable-next-line no-console
+  console.debug("Supabase URL (browser):", supabaseUrl);
+}
