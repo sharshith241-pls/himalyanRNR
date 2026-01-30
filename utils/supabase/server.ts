@@ -1,14 +1,17 @@
 
 import { createServerClient } from "@supabase/ssr";
+import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { cookies } from "next/headers";
 
 const stripQuotes = (s: string) => s.trim().replace(/^"+|"+$/g, "").replace(/^'+|'+$/g, "");
 
 const rawSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
 const rawSupabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ?? "";
+const rawSupabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
 const supabaseUrl = stripQuotes(rawSupabaseUrl);
 const supabaseKey = stripQuotes(rawSupabaseKey);
+const supabaseServiceRoleKey = stripQuotes(rawSupabaseServiceRoleKey);
 
 export const createClient = async () => {
   if (!supabaseUrl || !supabaseKey) {
@@ -39,4 +42,14 @@ export const createClient = async () => {
       },
     },
   );
+};
+
+export const createServiceRoleClient = () => {
+  if (!supabaseUrl || !supabaseServiceRoleKey) {
+    throw new Error(
+      "Missing Supabase service role environment variables. Please ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set."
+    );
+  }
+
+  return createSupabaseClient(supabaseUrl, supabaseServiceRoleKey);
 };
