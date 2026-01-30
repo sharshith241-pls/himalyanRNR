@@ -96,10 +96,12 @@ export async function signIn(formData: FormData) {
     }
 
     // After successful sign in, fetch profile role and approved status
+    // Use service-role client to bypass RLS policies
     const userId = data?.user?.id;
     if (!userId) return { success: true };
 
-    const { data: profileData, error: profileError } = await supabase
+    const admin = createServiceRoleClient();
+    const { data: profileData, error: profileError } = await admin
       .from("profiles")
       .select("role, approved")
       .eq("id", userId)
@@ -107,6 +109,7 @@ export async function signIn(formData: FormData) {
 
     if (profileError) {
       // if profile not found, default to regular user
+      console.error("Profile fetch error:", profileError);
       return { success: true, role: "user" };
     }
 
@@ -115,6 +118,7 @@ export async function signIn(formData: FormData) {
       return { success: false, error: "This account is not an admin." };
     }
 
+    console.log("User role from database:", profileData?.role);
     return { success: true, role: profileData?.role || "user", approved: profileData?.approved || false };
   } catch (error) {
     return { success: false, error: getErrorMessage(error) };
