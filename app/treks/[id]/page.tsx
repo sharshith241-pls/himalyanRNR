@@ -25,76 +25,8 @@ interface Trek {
   ending_point?: string;
 }
 
-const DEMO_TREKS: Record<string, Trek> = {
-  "1": {
-    id: "1",
-    title: "Kids Endurance Camp – Level 2",
-    location: "KARNATAKA",
-    duration: "1 day",
-    difficulty: "Easy",
-    price: 3099,
-    original_price: 4000,
-    category: "sunrise-treks",
-    description: "Perfect for kids to build stamina and confidence in a fun and safe environment.",
-    itinerary: "Day 1: Assembly at 5 AM | Trek start | Rest breaks | Scenic viewpoint | Return by 12 PM",
-    included: "Breakfast, Water bottles, First aid kit, Expert guide",
-    not_included: "Personal expenses, Extra meals",
-    max_participants: 20,
-    starting_point: "Bangalore",
-    ending_point: "Bangalore",
-  },
-  "2": {
-    id: "2",
-    title: "Kaiwara Betta Trek",
-    location: "KARNATAKA",
-    duration: "1 day",
-    difficulty: "Easy",
-    price: 1399,
-    original_price: 1699,
-    category: "sunrise-treks",
-    description: "Watch the sunrise from a scenic mountain peak and experience the beauty of nature.",
-    itinerary: "Day 1: Start 4:30 AM | 2-hour trek | Sunrise viewing | Breakfast | Descent by 10 AM",
-    included: "Breakfast, Water bottles, First aid kit, Expert guide",
-    not_included: "Personal expenses, Extra meals",
-    max_participants: 30,
-    starting_point: "Tumkur",
-    ending_point: "Tumkur",
-  },
-  "3": {
-    id: "3",
-    title: "Banasura Trek",
-    location: "SOUTH INDIA",
-    duration: "2 days",
-    difficulty: "Easy",
-    price: 5299,
-    original_price: 5799,
-    category: "all-treks",
-    description: "Experience stunning views and serene landscapes across a 2-day adventure.",
-    itinerary: "Day 1: Arrival | Trek to base camp | Bonfire | Dinner\nDay 2: Early morning trek | Summit views | Breakfast | Return",
-    included: "All meals, Accommodation, First aid kit, Expert guides",
-    not_included: "Personal expenses, Equipment rental",
-    max_participants: 25,
-    starting_point: "Wayanad",
-    ending_point: "Wayanad",
-  },
-  "4": {
-    id: "4",
-    title: "KIDS Discovery Camp Level-1",
-    location: "KARNATAKA",
-    duration: "2 days",
-    difficulty: "Easy",
-    price: 2500,
-    original_price: 3200,
-    category: "all-treks",
-    description: "An introductory camping experience for beginners of all ages.",
-    itinerary: "Day 1: Arrival | Campsite setup | Games | Dinner\nDay 2: Nature walk | Breakfast | Departure",
-    included: "All meals, Tent accommodation, Activities, Guide",
-    not_included: "Personal expenses, Extra activities",
-    max_participants: 15,
-    starting_point: "Bangalore",
-    ending_point: "Bangalore",
-  },
-};
+const DEMO_TREKS: Record<string, Trek> = {};
+// NOTE: Demo treks removed. Only database treks are displayed.
 
 export default function TrekDetailPage() {
   const params = useParams();

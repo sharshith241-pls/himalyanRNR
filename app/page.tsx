@@ -18,52 +18,8 @@ interface Trek {
   description?: string;
 }
 
-const DEMO_TREKS: Trek[] = [
-  {
-    id: "1",
-    title: "Kids Endurance Camp – Level 2",
-    location: "KARNATAKA",
-    duration: "1 day",
-    difficulty: "Easy",
-    price: 3099,
-    original_price: 4000,
-    category: "sunrise-treks",
-    description: "Perfect for kids to build stamina and confidence",
-  },
-  {
-    id: "2",
-    title: "Kaiwara Betta Trek",
-    location: "KARNATAKA",
-    duration: "1 day",
-    difficulty: "Easy",
-    price: 1399,
-    original_price: 1699,
-    category: "sunrise-treks",
-    description: "Watch the sunrise from a scenic mountain peak",
-  },
-  {
-    id: "3",
-    title: "Banasura Trek",
-    location: "SOUTH INDIA",
-    duration: "2 days",
-    difficulty: "Easy",
-    price: 5299,
-    original_price: 5799,
-    category: "all-treks",
-    description: "Experience stunning views and serene landscapes",
-  },
-  {
-    id: "4",
-    title: "KIDS Discovery Camp Level-1",
-    location: "KARNATAKA",
-    duration: "2 days",
-    difficulty: "Easy",
-    price: 2500,
-    original_price: 3200,
-    category: "all-treks",
-    description: "An introductory camping experience for beginners",
-  },
-];
+const DEMO_TREKS: Trek[] = [];
+// NOTE: Demo treks removed. Only database treks are displayed.
 
 const CATEGORIES = [
   { id: "all-treks", name: "All Treks", icon: "🌍" },
