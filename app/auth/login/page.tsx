@@ -53,12 +53,8 @@ export default function LoginPage() {
         const approved = (result as any).approved || false;
 
         setTimeout(() => {
-          if (selectedRole === 'admin') {
-            // User explicitly requested admin sign-in — server enforces this
-            if (role === 'admin') router.push('/admin/dashboard');
-            else setError('This account is not an admin');
-          } else if (role === 'admin') {
-            // Admin account signed in but user selected normal login — still allow
+          if (role === 'admin') {
+            // Admin account — redirect to admin dashboard
             router.push('/admin/dashboard');
           } else if (role === 'guide' && approved) router.push('/guide/dashboard');
           else if (role === 'guide' && !approved) router.push('/pending-approval');
@@ -66,6 +62,7 @@ export default function LoginPage() {
         }, 800);
       } else {
         setError(result.error || "Login failed");
+        setSuccess("");
       }
     } catch (err) {
       setError("An unexpected error occurred");
