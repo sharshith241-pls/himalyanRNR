@@ -120,7 +120,7 @@ export default function NewTrekPage() {
                 value={formData.location}
                 onChange={handleChange}
                 placeholder="e.g., Himalayas"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-grey-900 
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900 
                  placeholder-gray-500
     placeholder-opacity-100"
                 required
