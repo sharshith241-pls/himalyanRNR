@@ -137,7 +137,8 @@ export default function NewTrekPage() {
                 value={formData.price}
                 onChange={handleChange}
                 placeholder="e.g., 5000"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none placeholder-gray-500
+    placeholder-opacity-100"
                 required
               />
             </div>
@@ -153,7 +154,8 @@ export default function NewTrekPage() {
                 value={formData.duration}
                 onChange={handleChange}
                 placeholder="e.g., 2 days"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none placeholder-gray-500
+    placeholder-opacity-100"
               />
             </div>
 
@@ -166,7 +168,8 @@ export default function NewTrekPage() {
                 name="difficulty"
                 value={formData.difficulty}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none placeholder-gray-500
+    placeholder-opacity-100"
               >
                 <option>Easy</option>
                 <option>Moderate</option>
@@ -183,7 +186,8 @@ export default function NewTrekPage() {
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none placeholder-gray-500
+    placeholder-opacity-100"
               >
                 <option value="himalayan-treks">Himalayan Treks</option>
                 <option value="sunrise-treks">Sunrise Treks</option>
@@ -204,7 +208,8 @@ export default function NewTrekPage() {
                 onChange={handleChange}
                 placeholder="Describe this trek..."
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none placeholder-gray-500
+    placeholder-opacity-100"
               />
             </div>
 
@@ -219,7 +224,8 @@ export default function NewTrekPage() {
                 value={formData.image_url}
                 onChange={handleChange}
                 placeholder="https://example.com/image.jpg"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none placeholder-gray-500
+    placeholder-opacity-100"
               />
             </div>
 
