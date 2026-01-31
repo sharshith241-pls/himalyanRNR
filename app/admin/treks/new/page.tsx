@@ -103,7 +103,8 @@ export default function NewTrekPage() {
                 value={formData.title}
                 onChange={handleChange}
                 placeholder="e.g., Sunrise Trek"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none placeholder-gray-500
+    placeholder-opacity-100"
                 required
               />
             </div>
@@ -119,7 +120,7 @@ export default function NewTrekPage() {
                 value={formData.location}
                 onChange={handleChange}
                 placeholder="e.g., Himalayas"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-grey-900 
                  placeholder-gray-500
     placeholder-opacity-100"
                 required
