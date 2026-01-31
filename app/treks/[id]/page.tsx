@@ -17,6 +17,7 @@ interface Trek {
   original_price?: number;
   category: string;
   description?: string;
+  image_url?: string;
   itinerary?: string;
   included?: string;
   not_included?: string;
@@ -178,9 +179,20 @@ export default function TrekDetailPage() {
 
       {/* Hero Section with Trek Image */}
       <section className="relative bg-gradient-to-br from-teal-400 to-blue-500 h-96 flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 opacity-20 text-center flex items-center justify-center text-9xl">
-          ⛰️
-        </div>
+        {trek.image_url ? (
+          <>
+            <img
+              src={trek.image_url}
+              alt={trek.title}
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-black/30"></div>
+          </>
+        ) : (
+          <div className="absolute inset-0 opacity-20 text-center flex items-center justify-center text-9xl">
+            ⛰️
+          </div>
+        )}
         <div className="relative text-center text-white max-w-4xl px-4">
           <h1 className="text-5xl md:text-6xl font-black mb-4">{trek.title}</h1>
           <p className="text-xl font-semibold">{trek.location}</p>

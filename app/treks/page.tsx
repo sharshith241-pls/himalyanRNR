@@ -15,6 +15,7 @@ interface Trek {
   original_price?: number;
   category: string;
   description?: string;
+  image_url?: string;
 }
 
 const DEMO_TREKS: Trek[] = [];
@@ -270,10 +271,20 @@ export default function TreksPage() {
                     className="group bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition transform hover:-translate-y-1"
                   >
                     {/* Image */}
-                    <div className="relative bg-gradient-to-br from-teal-300 to-blue-300 h-64 flex items-center justify-center overflow-hidden">
-                      <div className="absolute inset-0 group-hover:scale-110 transition duration-300">
-                        <span className="text-8xl flex items-center justify-center h-full">⛰️</span>
-                      </div>
+                    <div className="relative bg-gradient-to-br from-teal-300 to-blue-300 h-64 flex items-center justify-center overflow-hidden group">
+                      {trek.image_url ? (
+                        <div className="absolute inset-0 group-hover:scale-110 transition duration-300">
+                          <img
+                            src={trek.image_url}
+                            alt={trek.title}
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ) : (
+                        <div className="absolute inset-0 group-hover:scale-110 transition duration-300">
+                          <span className="text-8xl flex items-center justify-center h-full">⛰️</span>
+                        </div>
+                      )}
                       <div className="absolute top-4 left-4 right-4 flex justify-between gap-2 z-10">
                         <span className="bg-teal-600 text-white px-3 py-1 rounded-full text-xs font-bold">
                           {trek.category.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
