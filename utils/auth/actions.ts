@@ -70,7 +70,7 @@ export async function signUp(formData: FormData) {
 
     return {
       success: true,
-      message: "Account created! Please check your email to confirm.",
+      message: "Account created! you can now sign in.",
     };
   } catch (error) {
     return { success: false, error: getErrorMessage(error) };
