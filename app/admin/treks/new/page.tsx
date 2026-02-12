@@ -98,6 +98,14 @@ export default function NewTrekPage() {
       }
       setUploadingImage(false);
 
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setError("You must be logged in to create a trek");
+        setLoading(false);
+        return;
+      }
+
       const { data, error: insertError } = await supabase.from("treks").insert([
         {
           title: formData.title,
@@ -108,6 +116,7 @@ export default function NewTrekPage() {
           difficulty: formData.difficulty,
           category: formData.category,
           image_url: imageUrl,
+          guide_id: user.id,
         },
       ]);
 
