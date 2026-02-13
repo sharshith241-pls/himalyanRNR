@@ -135,7 +135,7 @@ export default function EditTrekPage() {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
                 required
               />
             </div>
@@ -148,7 +148,7 @@ export default function EditTrekPage() {
                 name="location"
                 value={formData.location}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
                 required
               />
             </div>
@@ -161,7 +161,7 @@ export default function EditTrekPage() {
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
                 required
               />
             </div>
@@ -174,7 +174,7 @@ export default function EditTrekPage() {
                 name="duration"
                 value={formData.duration}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
               />
             </div>
 
@@ -185,7 +185,7 @@ export default function EditTrekPage() {
                 name="difficulty"
                 value={formData.difficulty}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
               >
                 <option>Easy</option>
                 <option>Moderate</option>
@@ -200,7 +200,7 @@ export default function EditTrekPage() {
                 name="category"
                 value={formData.category}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
               >
                 <option value="himalayan-treks">Himalayan Treks</option>
                 <option value="sunrise-treks">Sunrise Treks</option>
@@ -218,7 +218,7 @@ export default function EditTrekPage() {
                 value={formData.description}
                 onChange={handleChange}
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
               />
             </div>
 
@@ -230,7 +230,7 @@ export default function EditTrekPage() {
                 name="image_url"
                 value={formData.image_url}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
               />
             </div>
 

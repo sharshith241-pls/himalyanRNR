@@ -25,8 +25,8 @@ const CATEGORIES = [
   { id: "all-treks", name: "All Treks", icon: "🌍" },
   { id: "sunrise-treks", name: "Sunrise Treks", icon: "🌅" },
   { id: "backpacking", name: "Backpacking Trips", icon: "🎒" },
-  { id: "himalayan", name: "Himalayan Treks", icon: "⛰️" },
-  { id: "monsoon", name: "Monsoon Treks", icon: "🌧️" },
+  { id: "himalayan-treks", name: "Himalayan Treks", icon: "⛰️" },
+  { id: "monsoon-treks", name: "Monsoon Treks", icon: "🌧️" },
   { id: "yatra", name: "Yatra", icon: "🚴" },
 ];
 
@@ -263,9 +263,17 @@ export default function HomePage() {
                 >
                   {/* Image */}
                   <div className="relative bg-gradient-to-br from-teal-300 to-blue-300 h-48 flex items-center justify-center overflow-hidden">
-                    <div className="absolute inset-0 group-hover:scale-110 transition duration-300">
-                      <span className="text-6xl flex items-center justify-center h-full">⛰️</span>
-                    </div>
+                    {trek.image_url ? (
+                      <img
+                        src={trek.image_url}
+                        alt={trek.title}
+                        className="w-full h-full object-cover group-hover:scale-110 transition duration-300"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 group-hover:scale-110 transition duration-300">
+                        <span className="text-6xl flex items-center justify-center h-full">⛰️</span>
+                      </div>
+                    )}
                     <span className="absolute top-3 left-3 bg-teal-600 text-white px-3 py-1 rounded-full text-xs font-bold z-10">
                       {trek.category.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
                     </span>

@@ -128,8 +128,18 @@ export default function AdminTreksPage() {
                 key={trek.id}
                 className="trek-card bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
               >
-                <div className="bg-gradient-to-br from-teal-200 to-emerald-200 h-40 flex items-center justify-center">
-                  <span className="text-5xl">⛰️</span>
+                <div className="relative h-40 flex items-center justify-center overflow-hidden">
+                  {trek.image_url ? (
+                    <img
+                      src={trek.image_url}
+                      alt={trek.title}
+                      className="absolute inset-0 w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="bg-gradient-to-br from-teal-200 to-emerald-200 w-full h-full flex items-center justify-center">
+                      <span className="text-5xl">⛰️</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="p-4">
