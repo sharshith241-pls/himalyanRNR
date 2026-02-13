@@ -3,6 +3,26 @@
 import { createClient, createServiceRoleClient } from "@/utils/supabase/server";
 import { getErrorMessage } from "./helpers";
 
+export async function signInWithGoogle() {
+  try {
+    const supabase = await createClient();
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback`,
+      },
+    });
+
+    if (error) {
+      return { success: false, error: getErrorMessage(error) };
+    }
+
+    return { success: true, url: data?.url };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error) };
+  }
+}
+
 export async function signUp(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
@@ -11,10 +31,12 @@ export async function signUp(formData: FormData) {
   try {
     const supabase = await createClient();
 
+    // Sign up with email confirmation disabled - we'll handle verification manually
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/verify-email?email=${encodeURIComponent(email)}`,
         data: {
           full_name: fullName,
         },
@@ -25,53 +47,41 @@ export async function signUp(formData: FormData) {
       return { success: false, error: getErrorMessage(error) };
     }
 
-    // Save user profile to the `profiles` table (explicit role: 'user')
-    // Use the service-role client for this insert so RLS does not block it.
-    if (data.user) {
-      try {
-        const admin = createServiceRoleClient();
-        const { error: profileError } = await admin
-          .from("profiles")
-          .insert([
-            {
-              id: data.user.id,
-              email: email,
-              full_name: fullName,
-              role: 'user',
-              created_at: new Date().toISOString(),
-            },
-          ]);
-
-        if (profileError) {
-          console.error("Error saving profile with service role:", profileError);
-          return { success: false, error: getErrorMessage(profileError) };
-        }
-      } catch (err) {
-        // If service-role is not configured, fall back to best-effort insert with the current client.
-        console.error("Service role insert failed or not configured, falling back to regular client:", err);
-        const { error: profileError } = await supabase
-          .from("profiles")
-          .insert([
-            {
-              id: data.user.id,
-              email: email,
-              full_name: fullName,
-              role: 'user',
-              created_at: new Date().toISOString(),
-            },
-          ]);
-
-        if (profileError) {
-          console.error("Error saving profile with fallback client:", profileError);
-          return { success: false, error: getErrorMessage(profileError) };
-        }
-      }
-    }
-
+    // Return success with email - user needs to verify before account is fully active
     return {
       success: true,
-      message: "Account created! you can now sign in.",
+      message: "Account created! Please verify your email to continue.",
+      email: email,
+      userId: data.user?.id,
     };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error) };
+  }
+}
+
+export async function completeUserProfile(userId: string, email: string, fullName: string) {
+  try {
+    const admin = createServiceRoleClient();
+    
+    // Save user profile to the `profiles` table after email verification
+    const { error: profileError } = await admin
+      .from("profiles")
+      .insert([
+        {
+          id: userId,
+          email: email,
+          full_name: fullName,
+          role: 'user',
+          created_at: new Date().toISOString(),
+        },
+      ]);
+
+    if (profileError) {
+      console.error("Error saving profile:", profileError);
+      return { success: false, error: getErrorMessage(profileError) };
+    }
+
+    return { success: true, message: "Profile created successfully!" };
   } catch (error) {
     return { success: false, error: getErrorMessage(error) };
   }
