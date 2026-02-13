@@ -125,7 +125,7 @@ export default function TrekDetailPage() {
       <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
-            <img src="/logo.png" alt="Himalayan Runners" className="h-12 w-auto" />
+            <img src="/logo.jpeg" alt="Himalayan Runners" className="h-12 w-auto" />
           </Link>
 
           <div className="flex gap-6 items-center">

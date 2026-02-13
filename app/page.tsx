@@ -125,7 +125,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
           <Link href="/" className="flex items-center hover:opacity-80 transition">
             <img 
-              src="/logo.png" 
+              src="/logo.jpeg" 
               alt="Himalayan Runners Logo" 
               className="h-12 w-auto"
             />

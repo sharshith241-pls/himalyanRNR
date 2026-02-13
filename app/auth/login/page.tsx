@@ -86,7 +86,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md animate-slide-in">
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
           <div className="text-center mb-8">
-            <img src="/logo.png" alt="Himalayan Runners" className="h-16 w-auto mx-auto mb-4" />
+            <img src="/logo.jpeg" alt="Himalayan Runners" className="h-16 w-auto mx-auto mb-4" />
             <h1 className="text-3xl font-bold text-gray-900">
               Himalayan Runners
             </h1>
