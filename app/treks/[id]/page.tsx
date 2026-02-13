@@ -124,14 +124,8 @@ export default function TrekDetailPage() {
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition">
-            <span className="text-3xl">🏔️</span>
-            <div>
-              <h1 className="text-2xl font-bold bg-gradient-to-r from-teal-600 to-emerald-600 bg-clip-text text-transparent">
-                Himalayan Runners
-              </h1>
-              <p className="text-xs text-gray-600">Adventure Awaits</p>
-            </div>
+          <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
+            <img src="/logo.png" alt="Himalayan Runners" className="h-12 w-auto" />
           </Link>
 
           <div className="flex gap-6 items-center">

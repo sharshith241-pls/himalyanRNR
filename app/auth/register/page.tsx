@@ -92,17 +92,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md animate-slide-in">
         <div className="bg-white rounded-2xl shadow-lg p-8 border border-gray-200">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-r from-orange-500 to-teal-600 rounded-full mb-4 shadow-lg">
-              <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10 text-white">
-                <defs>
-                  <linearGradient id="logoOrange2" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" style={{stopColor:"#FFFFFF",stopOpacity:1}} />
-                    <stop offset="100%" style={{stopColor:"#FFFFFF",stopOpacity:1}} />
-                  </linearGradient>
-                </defs>
-                <text x="100" y="130" fontSize="80" fontWeight="bold" textAnchor="middle" fill="white">HR</text>
-              </svg>
-            </div>
+            <img src="/logo.png" alt="Himalayan Runners" className="h-16 w-auto mx-auto mb-4" />
             <h1 className="text-3xl font-bold text-gray-900">
               Create Account
             </h1>
