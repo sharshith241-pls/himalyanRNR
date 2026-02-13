@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
-import { createClient } from "@/utils/supabase/client";
+import { supabase } from "@/utils/supabase/client";
 import { completeUserProfile } from "@/utils/auth/actions";
 
 function VerifyEmailContent() {
@@ -47,7 +47,11 @@ function VerifyEmailContent() {
     setLoading(true);
 
     try {
-      const supabase = await createClient();
+      if (!supabase) {
+        setError("Supabase client not initialized");
+        setLoading(false);
+        return;
+      }
 
       // Verify the OTP
       const { data, error: verifyError } = await supabase.auth.verifyOtp({
@@ -95,11 +99,16 @@ function VerifyEmailContent() {
     setResendLoading(true);
 
     try {
-      const supabase = await createClient();
+      if (!supabase) {
+        setError("Supabase client not initialized");
+        setResendLoading(false);
+        return;
+      }
 
-      const { error } = await supabase.auth.resendOtp({
-        email,
+      // Send a new verification email
+      const { error } = await supabase.auth.resend({
         type: "signup",
+        email: email,
       });
 
       if (error) {
