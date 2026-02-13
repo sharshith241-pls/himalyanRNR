@@ -145,15 +145,7 @@ export default function AdminDashboard() {
             <div className="mt-4 text-emerald-600 font-semibold">View Bookings →</div>
           </Link>
 
-          <Link
-            href="/admin/guides"
-            className="bg-white rounded-lg shadow-md p-8 hover:shadow-lg transition-all duration-300 transform hover:scale-105 cursor-pointer border-l-4 border-blue-600"
-          >
-            <div className="text-4xl mb-4">👨‍🏫</div>
-            <h3 className="text-xl font-bold text-gray-800 mb-2">Manage Guides</h3>
-            <p className="text-gray-600">Manage guide profiles and assignments</p>
-            <div className="mt-4 text-blue-600 font-semibold">View Guides →</div>
-          </Link>
+          {/* Manage Guides quick-action removed per request */}
         </div>
       </div>
     </div>

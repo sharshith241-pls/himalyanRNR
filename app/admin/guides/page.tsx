@@ -97,12 +97,7 @@ export default function AdminGuidesPage() {
             <div className="text-6xl mb-4">👥</div>
             <h3 className="text-2xl font-bold text-gray-800 mb-2">No Guides Yet</h3>
             <p className="text-gray-600">Guides will appear here when they register</p>
-            <Link
-              href="/admin/dashboard"
-              className="mt-6 inline-block bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all"
-            >
-              Back to Dashboard
-            </Link>
+            {/* Back to Dashboard link removed per request */}
           </div>
         ) : (
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
