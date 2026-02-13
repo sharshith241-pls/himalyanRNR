@@ -131,6 +131,25 @@ export async function resetPasswordForEmail(formData: FormData) {
   try {
     const supabase = await createClient();
 
+    // Security: Verify email exists in profiles table before sending reset email
+    // This prevents email enumeration attacks
+    const { data: profileData, error: profileError } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", email)
+      .single();
+
+    // Return same success message regardless of whether email exists
+    // This prevents information disclosure about registered emails
+    if (profileError || !profileData) {
+      // Email doesn't exist in profiles table - silently succeed to prevent user enumeration
+      return {
+        success: true,
+        message: "Check your email for a password reset link.",
+      };
+    }
+
+    // Email exists, proceed with password reset
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/reset-password`,
     });
