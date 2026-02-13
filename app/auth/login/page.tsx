@@ -20,10 +20,14 @@ function LoginContent() {
 
   useEffect(() => {
     const verified = searchParams.get("verified");
+    const resetSuccess = searchParams.get("reset");
     const errorParam = searchParams.get("error");
     
     if (verified) {
       setSuccess("Email verified! You can now sign in.");
+    }
+    if (resetSuccess === "success") {
+      setSuccess("Password reset successfully! Please sign in with your new password.");
     }
     if (errorParam) {
       setError(decodeURIComponent(errorParam));

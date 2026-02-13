@@ -181,6 +181,14 @@ export async function updatePassword(newPassword: string) {
   try {
     const supabase = await createClient();
 
+    // IMPORTANT: Must have a valid recovery session from reset link
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    
+    if (sessionError || !sessionData.session) {
+      return { success: false, error: "Invalid or expired reset link. Please request a new one." };
+    }
+
+    // Update the password
     const { error } = await supabase.auth.updateUser({
       password: newPassword,
     });
@@ -189,7 +197,15 @@ export async function updatePassword(newPassword: string) {
       return { success: false, error: getErrorMessage(error) };
     }
 
-    return { success: true, message: "Password updated successfully!" };
+    // Password updated successfully - user must now sign in with new password
+    // Sign them out after password change to force re-authentication with new password
+    await supabase.auth.signOut();
+
+    return { 
+      success: true, 
+      message: "Password updated successfully! Please sign in with your new password.",
+      requiresReLogin: true 
+    };
   } catch (error) {
     return { success: false, error: getErrorMessage(error) };
   }

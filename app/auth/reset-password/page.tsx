@@ -63,7 +63,7 @@ function ResetPasswordContent() {
         setSuccess(result.message || "Password updated successfully!");
         setPassword("");
         setConfirmPassword("");
-        setTimeout(() => router.push("/auth/login"), 2000);
+        setTimeout(() => router.push("/auth/login?reset=success"), 2000);
       } else {
         setError(result.error || "Failed to update password");
       }
@@ -74,37 +74,38 @@ function ResetPasswordContent() {
     }
   };
 
-  if (invalidToken) {
-    return (
-      <div>
-        <h1 className="text-3xl font-bold text-center mb-2">
-          Reset Password
-        </h1>
+  return (
+    <div>
+      <h1 className="text-3xl font-bold text-center mb-2">
+        Reset Password
+      </h1>
 
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
-          {error}
-        </div>
-
-        <div className="text-center text-sm text-gray-600 mt-6">
-          <a
-            href="/auth/forgot-password"
-            className="text-blue-600 hover:text-blue-700 font-medium"
-          >
-            Request a new reset link
-          </a>
-        </div>
+      <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+        {error}
       </div>
-    );
-  }
+
+      <div className="text-center text-sm text-gray-600 mt-6">
+        <a
+          href="/auth/forgot-password"
+          className="text-blue-600 hover:text-blue-700 font-medium"
+        >
+          Request a new reset link
+        </a>
+      </div>
+    </div>
+  );
 
   return (
     <div>
       <h1 className="text-3xl font-bold text-center mb-2">
         Set New Password
       </h1>
-      <p className="text-center text-gray-600 mb-8">
+      <p className="text-center text-gray-600 mb-2">
         Enter your new password below
       </p>
+      <div className="text-center text-sm bg-blue-50 border border-blue-200 text-blue-700 rounded-md p-3 mb-4">
+        <strong>⚠️ Required:</strong> You must set a new password to complete the reset. This password change cannot be skipped.
+      </div>
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
