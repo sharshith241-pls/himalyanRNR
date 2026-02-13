@@ -108,15 +108,23 @@ export default function LoginPage() {
               Sign in as
             </label>
             <select
-              id="role"
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value)}
-              disabled={loading}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-orange-500 focus:outline-none text-gray-800"
-            >
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
-            </select>
+  id="role"
+  value={selectedRole}
+  onChange={(e) => setSelectedRole(e.target.value)}
+  disabled={loading}
+  className="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg 
+             focus:border-orange-500 focus:outline-none 
+             text-gray-800 shadow-sm appearance-none"
+>
+  <option value="user" className="bg-white text-gray-800">
+    User
+  </option>
+  <option value="admin" className="bg-white text-gray-800">
+    Admin
+  </option>
+</select>
+
+            
           </div>
 
           {error && (
