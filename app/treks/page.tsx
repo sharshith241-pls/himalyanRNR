@@ -53,7 +53,6 @@ export default function TreksPage() {
       try {
         if (!supabase) {
           setTreks(DEMO_TREKS);
-          applyFilters(DEMO_TREKS);
           setLoading(false);
           return;
         }
@@ -64,17 +63,13 @@ export default function TreksPage() {
 
         if (queryError) {
           setTreks(DEMO_TREKS);
-          applyFilters(DEMO_TREKS);
         } else if (data && data.length > 0) {
           setTreks(data);
-          applyFilters(data);
         } else {
           setTreks(DEMO_TREKS);
-          applyFilters(DEMO_TREKS);
         }
       } catch (err) {
         setTreks(DEMO_TREKS);
-        applyFilters(DEMO_TREKS);
       } finally {
         setLoading(false);
       }
@@ -83,37 +78,42 @@ export default function TreksPage() {
     fetchTreks();
   }, []);
 
-  const applyFilters = (treksList: Trek[]) => {
+  const applyFilters = (treksList: Trek[], search: string, sort: string, difficulty: string) => {
     let filtered = treksList;
 
     // Search filter
-    if (searchQuery) {
+    if (search) {
       filtered = filtered.filter((trek) =>
-        trek.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        trek.location.toLowerCase().includes(searchQuery.toLowerCase())
+        trek.title.toLowerCase().includes(search.toLowerCase()) ||
+        trek.location.toLowerCase().includes(search.toLowerCase())
       );
     }
 
     // Difficulty filter
-    if (difficultyFilter !== "all") {
-      filtered = filtered.filter((trek) => trek.difficulty === difficultyFilter);
+    if (difficulty !== "all") {
+      filtered = filtered.filter((trek) => trek.difficulty === difficulty);
     }
 
-    // Sort
-    if (sortBy === "price-asc") {
-      filtered = filtered.sort((a, b) => a.price - b.price);
-    } else if (sortBy === "price-desc") {
-      filtered = filtered.sort((a, b) => b.price - a.price);
-    } else if (sortBy === "newest") {
-      filtered = filtered.reverse();
+    // Sort - create a copy to avoid mutating the original array
+    filtered = [...filtered];
+    if (sort === "price-asc") {
+      filtered.sort((a, b) => a.price - b.price);
+    } else if (sort === "price-desc") {
+      filtered.sort((a, b) => b.price - a.price);
+    } else if (sort === "newest") {
+      filtered.reverse();
     }
 
     setFilteredTreks(filtered);
   };
 
+  // Re-apply filters whenever searchQuery, sortBy, or difficultyFilter change
+  useEffect(() => {
+    applyFilters(treks, searchQuery, sortBy, difficultyFilter);
+  }, [searchQuery, sortBy, difficultyFilter, treks]);
+
   const handleSearch = (query: string) => {
     setSearchQuery(query);
-    applyFilters(treks);
   };
 
   const handleLogout = async () => {
@@ -212,10 +212,7 @@ export default function TreksPage() {
                 <h3 className="font-black text-xl mb-4 text-gray-900">📊 Sort By</h3>
                 <select
                   value={sortBy}
-                  onChange={(e) => {
-                    setSortBy(e.target.value);
-                    applyFilters(treks);
-                  }}
+                  onChange={(e) => setSortBy(e.target.value)}
                   className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent font-semibold text-gray-900 bg-white cursor-pointer"
                 >
                   <option value="newest">Newest</option>
@@ -234,10 +231,7 @@ export default function TreksPage() {
                         name="difficulty"
                         value={diff}
                         checked={difficultyFilter === diff}
-                        onChange={(e) => {
-                          setDifficultyFilter(e.target.value);
-                          applyFilters(treks);
-                        }}
+                        onChange={(e) => setDifficultyFilter(e.target.value)}
                         className="rounded-full w-5 h-5 cursor-pointer"
                       />
                       <span className="text-base font-bold text-gray-900">
