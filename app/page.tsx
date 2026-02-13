@@ -353,7 +353,7 @@ export default function HomePage() {
             <div>
               <h4 className="text-white font-black mb-4 text-lg">Contact</h4>
               <p className="text-sm text-gray-200">Email: ranamadan295@gmail.com</p>
-              <p className="text-sm text-gray-200">Phone: +91-6363710799</p>
+              <p className="text-sm text-gray-200">Phone: +91-9410559511</p>
             </div>
             <div>
               <h4 className="text-white font-black mb-4 text-lg">Follow Us</h4>

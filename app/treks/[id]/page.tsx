@@ -21,6 +21,7 @@ interface Trek {
   itinerary?: string;
   included?: string;
   not_included?: string;
+  important_info?: string;
   max_participants?: number;
   starting_point?: string;
   ending_point?: string;
@@ -265,11 +266,28 @@ export default function TrekDetailPage() {
             <div className="bg-blue-50 border-2 border-blue-200 rounded-lg p-6">
               <h3 className="text-xl font-bold mb-4">ℹ️ Important Information</h3>
               <ul className="space-y-3 text-gray-700">
-                <li>✓ Starting Point: {trek.starting_point}</li>
-                <li>✓ Ending Point: {trek.ending_point}</li>
-                <li>✓ Suitable for ages 10 and above</li>
-                <li>✓ Professional guides provided throughout</li>
-                <li>✓ First aid kit included</li>
+                {trek.starting_point && (
+                  <li>✓ Starting Point: {trek.starting_point}</li>
+                )}
+                {trek.ending_point && (
+                  <li>✓ Ending Point: {trek.ending_point}</li>
+                )}
+
+                {trek.important_info && trek.important_info.trim() ? (
+                  trek.important_info
+                    .split(/\r?\n/)
+                    .map((line) => line.trim())
+                    .filter(Boolean)
+                    .map((line, i) => (
+                      <li key={i}>✓ {line}</li>
+                    ))
+                ) : (
+                  <>
+                    <li>✓ Suitable for ages 10 and above</li>
+                    <li>✓ Professional guides provided throughout</li>
+                    <li>✓ First aid kit included</li>
+                  </>
+                )}
               </ul>
             </div>
           </div>
