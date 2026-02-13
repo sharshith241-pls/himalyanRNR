@@ -24,6 +24,10 @@ export default function NewTrekPage() {
     difficulty: "Easy",
     category: "himalayan-treks",
     image_url: "",
+    itinerary: "",
+    included: "",
+    not_included: "",
+    important_info: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -117,6 +121,10 @@ export default function NewTrekPage() {
           category: formData.category,
           image_url: imageUrl,
           guide_id: user.id,
+          itinerary: formData.itinerary,
+          included: formData.included,
+          not_included: formData.not_included,
+          important_info: formData.important_info,
         },
       ]);
 
@@ -280,6 +288,66 @@ text-gray-900
     placeholder-opacity-100"
               />
             </div>
+
+              {/* Itinerary */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">
+                  Itinerary
+                </label>
+                <textarea
+                  name="itinerary"
+                  value={formData.itinerary}
+                  onChange={handleChange}
+                  placeholder="Day 1: ...\nDay 2: ..."
+                  rows={4}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none placeholder-gray-500 text-gray-900 placeholder-opacity-100"
+                />
+              </div>
+
+              {/* What's Included */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">
+                  What's Included (comma separated)
+                </label>
+                <textarea
+                  name="included"
+                  value={formData.included}
+                  onChange={handleChange}
+                  placeholder="Breakfast, Transport, Guide"
+                  rows={2}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none placeholder-gray-500 text-gray-900 placeholder-opacity-100"
+                />
+              </div>
+
+              {/* What's NOT Included */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">
+                  What's NOT Included (comma separated)
+                </label>
+                <textarea
+                  name="not_included"
+                  value={formData.not_included}
+                  onChange={handleChange}
+                  placeholder="Personal expenses, Extra meals"
+                  rows={2}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none placeholder-gray-500 text-gray-900 placeholder-opacity-100"
+                />
+              </div>
+
+              {/* Important Information */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">
+                  Important Information
+                </label>
+                <textarea
+                  name="important_info"
+                  value={formData.important_info}
+                  onChange={handleChange}
+                  placeholder="Suitable for ages 10 and above..."
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none placeholder-gray-500 text-gray-900 placeholder-opacity-100"
+                />
+              </div>
 
             {/* Image Upload */}
             <div>

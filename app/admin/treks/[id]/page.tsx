@@ -15,6 +15,10 @@ interface Trek {
   difficulty: string;
   category: string;
   image_url: string;
+  itinerary?: string;
+  included?: string;
+  not_included?: string;
+  important_info?: string;
 }
 
 export default function EditTrekPage() {
@@ -36,6 +40,10 @@ export default function EditTrekPage() {
     difficulty: "Easy",
     category: "himalayan-treks",
     image_url: "",
+    itinerary: "",
+    included: "",
+    not_included: "",
+    important_info: "",
   });
 
   useEffect(() => {
@@ -221,6 +229,54 @@ export default function EditTrekPage() {
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
               />
             </div>
+
+              {/* Itinerary */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">Itinerary</label>
+                <textarea
+                  name="itinerary"
+                  value={formData.itinerary || ""}
+                  onChange={handleChange}
+                  rows={4}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
+                />
+              </div>
+
+              {/* What's Included */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">What's Included (comma separated)</label>
+                <textarea
+                  name="included"
+                  value={formData.included || ""}
+                  onChange={handleChange}
+                  rows={2}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
+                />
+              </div>
+
+              {/* What's NOT Included */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">What's NOT Included (comma separated)</label>
+                <textarea
+                  name="not_included"
+                  value={formData.not_included || ""}
+                  onChange={handleChange}
+                  rows={2}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
+                />
+              </div>
+
+              {/* Important Information */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-800 mb-2">Important Information</label>
+                <textarea
+                  name="important_info"
+                  value={formData.important_info || ""}
+                  onChange={handleChange}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
+                />
+              </div>
 
             {/* Image URL */}
             <div>
