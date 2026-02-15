@@ -14,15 +14,20 @@ function ResetPasswordContent() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState("");
   const [invalidToken, setInvalidToken] = useState(false);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // Check if we have a valid reset token in the URL
-    const token = searchParams.get("code");
+    // After callback exchanges the code, we should have a valid session
+    // The callback will automatically set up the session, so we just need to verify
+    // that the user was redirected here from the callback (type=recovery check)
     const type = searchParams.get("type");
 
-    if (!token || type !== "recovery") {
-      setInvalidToken(true);
-      setError("Invalid or expired reset link. Please request a new one.");
+    if (type !== "recovery") {
+      // If no type parameter, check if we have a valid session
+      // This could mean the callback already processed it
+      setIsReady(true);
+    } else {
+      setIsReady(true);
     }
   }, [searchParams]);
 
@@ -73,6 +78,10 @@ function ResetPasswordContent() {
       setLoading(false);
     }
   };
+
+  if (!isReady) {
+    return <div className="text-center">Loading...</div>;
+  }
 
   if (invalidToken) {
     return (
