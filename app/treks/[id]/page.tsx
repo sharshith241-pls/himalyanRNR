@@ -42,8 +42,26 @@ export default function TrekDetailPage() {
   useEffect(() => {
     const getSession = async () => {
       if (supabase) {
-        const { data } = await supabase.auth.getSession();
-        setSession(data?.session);
+        try {
+          const { data, error } = await supabase.auth.getSession();
+          
+          if (error || !data?.session) {
+            setSession(null);
+            return;
+          }
+          
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          
+          if (userError || !user) {
+            setSession(null);
+            await supabase.auth.signOut();
+          } else {
+            setSession(data.session);
+          }
+        } catch (err) {
+          console.error("Session error:", err);
+          setSession(null);
+        }
       }
     };
     getSession();

@@ -41,8 +41,30 @@ export default function HomePage() {
   useEffect(() => {
     const getSession = async () => {
       if (supabase) {
-        const { data } = await supabase.auth.getSession();
-        setSession(data?.session);
+        try {
+          const { data, error } = await supabase.auth.getSession();
+          
+          // Validate that the session is actually valid
+          if (error || !data?.session) {
+            setSession(null);
+            return;
+          }
+          
+          // Check if session has expired by verifying with user
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          
+          if (userError || !user) {
+            // Session is invalid, clear it
+            setSession(null);
+            await supabase.auth.signOut();
+          } else {
+            // Session is valid
+            setSession(data.session);
+          }
+        } catch (err) {
+          console.error("Session error:", err);
+          setSession(null);
+        }
       }
     };
     getSession();

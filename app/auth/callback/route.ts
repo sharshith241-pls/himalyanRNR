@@ -2,6 +2,8 @@ import { createClient } from "@/utils/supabase/server";
 import { createServiceRoleClient } from "@/utils/supabase/server";
 import { NextResponse } from "next/server";
 
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
@@ -33,8 +35,17 @@ export async function GET(request: Request) {
     // Check if this is a password recovery flow
     const type = searchParams.get("type");
     if (type === "recovery") {
-      // For password recovery, redirect to reset password page where user can set new password
-      return NextResponse.redirect(new URL("/auth/reset-password", request.url));
+      // For password recovery, sign out the user to ensure they authenticate with new password
+      // then redirect to reset password page
+      await supabase.auth.signOut();
+      
+      // Create response and explicitly clear auth cookies to force fresh session
+      const response = NextResponse.redirect(new URL("/auth/reset-password", request.url));
+      // Clear Supabase auth cookies
+      response.cookies.delete('sb-' + supabaseUrl?.split('//')[1]?.split('.')[0] + '-auth-token');
+      response.cookies.delete('sb-' + supabaseUrl?.split('//')[1]?.split('.')[0] + '-auth-token.0');
+      response.cookies.delete('sb-' + supabaseUrl?.split('//')[1]?.split('.')[0] + '-auth-token.1');
+      return response;
     }
 
     if (data.user) {

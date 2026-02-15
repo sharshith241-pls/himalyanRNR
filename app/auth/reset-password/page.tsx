@@ -68,7 +68,17 @@ function ResetPasswordContent() {
         setSuccess(result.message || "Password updated successfully!");
         setPassword("");
         setConfirmPassword("");
-        setTimeout(() => router.push("/auth/login?reset=success"), 2000);
+        
+        // Clear any cached auth state and force a hard redirect
+        // Wait a bit to show success message
+        setTimeout(() => {
+          // Clear local storage/session storage of auth data
+          if (typeof window !== 'undefined') {
+            sessionStorage.clear();
+            // Force hard redirect to ensure fresh page load
+            window.location.href = "/auth/login?reset=success";
+          }
+        }, 2000);
       } else {
         setError(result.error || "Failed to update password");
       }
