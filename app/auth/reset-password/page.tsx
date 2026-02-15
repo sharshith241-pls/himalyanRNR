@@ -74,26 +74,28 @@ function ResetPasswordContent() {
     }
   };
 
-  return (
-    <div>
-      <h1 className="text-3xl font-bold text-center mb-2">
-        Reset Password
-      </h1>
+  if (invalidToken) {
+    return (
+      <div>
+        <h1 className="text-3xl font-bold text-center mb-2">
+          Invalid Reset Link
+        </h1>
 
-      <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
-        {error}
-      </div>
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
+          {error}
+        </div>
 
-      <div className="text-center text-sm text-gray-600 mt-6">
-        <a
-          href="/auth/forgot-password"
-          className="text-blue-600 hover:text-blue-700 font-medium"
-        >
-          Request a new reset link
-        </a>
+        <div className="text-center text-sm text-gray-600 mt-6">
+          <a
+            href="/auth/forgot-password"
+            className="text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Request a new reset link
+          </a>
+        </div>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
     <div>

@@ -30,6 +30,13 @@ export async function GET(request: Request) {
       );
     }
 
+    // Check if this is a password recovery flow
+    const type = searchParams.get("type");
+    if (type === "recovery") {
+      // For password recovery, redirect to reset password page where user can set new password
+      return NextResponse.redirect(new URL("/auth/reset-password", request.url));
+    }
+
     if (data.user) {
       // Check if profile exists
       const admin = createServiceRoleClient();

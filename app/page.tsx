@@ -385,6 +385,7 @@ export default function HomePage() {
           </div>
           <div className="border-t border-gray-700 pt-8 text-center text-sm">
             <p>&copy; 2025 Himalayan Runners. All rights reserved.</p>
+            <p>Developed by @sharshith241@gmail.com</p>
           </div>
         </div>
       </footer>
