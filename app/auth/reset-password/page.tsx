@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
+import { supabase } from "@/utils/supabase/client";
 import { updatePassword } from "@/utils/auth/actions";
 import { validatePassword, validatePasswordMatch } from "@/utils/auth/helpers";
 
@@ -20,7 +21,11 @@ function ResetPasswordContent() {
     // Check if we have a valid recovery session for password reset
     const checkRecoverySession = async () => {
       try {
-        const { supabase } = await import("@/utils/supabase/client");
+        if (!supabase) {
+          setError("Authentication service not available. Please try again.");
+          setInvalidToken(true);
+          return;
+        }
         
         // Get current session
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
