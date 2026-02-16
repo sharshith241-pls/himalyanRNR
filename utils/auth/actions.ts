@@ -9,7 +9,7 @@ export async function signInWithGoogle() {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/callback`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app"}/auth/callback`,
       },
     });
 
@@ -36,7 +36,7 @@ export async function signUp(formData: FormData) {
       email,
       password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/verify-email?email=${encodeURIComponent(email)}`,
+        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app"}/auth/verify-email?email=${encodeURIComponent(email)}`,
         data: {
           full_name: fullName,
         },
@@ -161,7 +161,7 @@ export async function resetPasswordForEmail(formData: FormData) {
 
     // Email exists, proceed with password reset
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/auth/reset-password`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app"}/auth/callback`,
     });
 
     if (error) {
