@@ -32,20 +32,13 @@ export async function GET(request: Request) {
       );
     }
 
-    // Check if this is a password recovery flow
-    const type = searchParams.get("type");
-    if (type === "recovery") {
-      // For password recovery, sign out the user to ensure they authenticate with new password
-      // then redirect to reset password page
-      await supabase.auth.signOut();
-      
-      // Create response and explicitly clear auth cookies to force fresh session
-      const response = NextResponse.redirect(new URL("/auth/reset-password", request.url));
-      // Clear Supabase auth cookies
-      response.cookies.delete('sb-' + supabaseUrl?.split('//')[1]?.split('.')[0] + '-auth-token');
-      response.cookies.delete('sb-' + supabaseUrl?.split('//')[1]?.split('.')[0] + '-auth-token.0');
-      response.cookies.delete('sb-' + supabaseUrl?.split('//')[1]?.split('.')[0] + '-auth-token.1');
-      return response;
+    // Check if this is a password recovery flow by looking at the URL
+    // Recovery emails have #access_token and type=recovery in the hash
+    if (request.url.includes("type=recovery")) {
+      // For password recovery, we have a valid recovery session
+      // Redirect to reset password page where user can set new password
+      // The recovery session in cookies will be used to update the password
+      return NextResponse.redirect(new URL("/auth/reset-password", request.url));
     }
 
     if (data.user) {

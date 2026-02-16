@@ -17,19 +17,42 @@ function ResetPasswordContent() {
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    // After callback exchanges the code, we should have a valid session
-    // The callback will automatically set up the session, so we just need to verify
-    // that the user was redirected here from the callback (type=recovery check)
-    const type = searchParams.get("type");
-
-    if (type !== "recovery") {
-      // If no type parameter, check if we have a valid session
-      // This could mean the callback already processed it
-      setIsReady(true);
-    } else {
-      setIsReady(true);
-    }
-  }, [searchParams]);
+    // Check if we have a valid recovery session for password reset
+    const checkRecoverySession = async () => {
+      try {
+        const { supabase } = await import("@/utils/supabase/client");
+        
+        // Get current session
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        // Check if we're in a recovery flow (has recovery session)
+        if (!session) {
+          // No session at all - user needs to request a new recovery link
+          setError("Invalid or expired reset link. Please request a new one.");
+          setInvalidToken(true);
+          return;
+        }
+        
+        // Session exists, check if it's a recovery session by trying to get user
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        
+        if (userError || !user) {
+          setError("Invalid recovery session. Please request a new reset link.");
+          setInvalidToken(true);
+          return;
+        }
+        
+        // Valid recovery session exists, we're ready
+        setIsReady(true);
+      } catch (err) {
+        console.error("Session check error:", err);
+        setError("An error occurred. Please try again.");
+        setInvalidToken(true);
+      }
+    };
+    
+    checkRecoverySession();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
