@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import Razorpay from "razorpay";
-import crypto from "crypto";
 
 const createRazorpayInstance = () => {
   const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
   if (!keyId || !keySecret) {
-    console.error("Razorpay credentials not configured");
+    console.error("Missing Razorpay credentials:", {
+      hasKeyId: !!keyId,
+      hasKeySecret: !!keySecret,
+    });
     return null;
   }
 
@@ -17,8 +19,6 @@ const createRazorpayInstance = () => {
   });
 };
 
-const razorpayInstance = createRazorpayInstance();
-
 // Validate email format
 const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -27,7 +27,7 @@ const isValidEmail = (email: string): boolean => {
 
 // Validate amount (in rupees)
 const isValidAmount = (amount: number): boolean => {
-  return Number.isFinite(amount) && amount >= 1 && amount <= 1000000; // Min ₹1, Max ₹10 lakhs
+  return Number.isFinite(amount) && amount >= 1 && amount <= 1000000;
 };
 
 // Validate string length and content
@@ -45,11 +45,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify Razorpay is configured
+    // Get Razorpay instance
+    const razorpayInstance = createRazorpayInstance();
+    
     if (!razorpayInstance) {
-      console.error("Razorpay instance not initialized");
+      console.error("Razorpay instance creation failed - Missing credentials");
       return NextResponse.json(
-        { error: "Payment service unavailable" },
+        { error: "Payment service unavailable. Please contact support." },
         { status: 503 }
       );
     }
@@ -80,7 +82,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate trek ID format (UUID or alphanumeric)
+    // Validate trek ID format
     if (!isValidString(trekId, 1, 50) || !/^[a-zA-Z0-9\-_]+$/.test(trekId)) {
       return NextResponse.json(
         { error: "Invalid trek ID format" },
@@ -112,6 +114,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    console.log("Creating Razorpay order:", { trekId, amount, userEmail });
+
     // Create Razorpay order
     const order = await razorpayInstance.orders.create({
       amount: Math.round(amount * 100), // Amount in paise
@@ -125,9 +129,11 @@ export async function POST(request: NextRequest) {
       },
     });
 
+    console.log("Order created successfully:", order.id);
+
     // Validate order creation
     if (!order || !order.id) {
-      console.error("Order creation failed");
+      console.error("Order creation returned invalid response");
       return NextResponse.json(
         { error: "Failed to create payment order" },
         { status: 500, headers }
@@ -137,7 +143,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(order, { status: 201, headers });
   } catch (error) {
     // Log error without exposing sensitive details
-    console.error("Order creation error:", error instanceof Error ? error.message : "Unknown error");
+    const errorMsg = error instanceof Error ? error.message : "Unknown error";
+    console.error("Order creation error:", errorMsg);
     
     return NextResponse.json(
       { error: "Payment service error. Please try again later." },
