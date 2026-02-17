@@ -7,6 +7,7 @@ const createRazorpayInstance = () => {
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
   if (!keyId || !keySecret) {
+    console.error("Razorpay credentials not configured");
     return null;
   }
 
@@ -18,30 +19,105 @@ const createRazorpayInstance = () => {
 
 const razorpayInstance = createRazorpayInstance();
 
+// Validate email format
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email) && email.length <= 254;
+};
+
+// Validate amount (in rupees)
+const isValidAmount = (amount: number): boolean => {
+  return Number.isFinite(amount) && amount >= 1 && amount <= 1000000; // Min ₹1, Max ₹10 lakhs
+};
+
+// Validate string length and content
+const isValidString = (str: string, minLength: number = 1, maxLength: number = 255): boolean => {
+  return typeof str === "string" && str.length >= minLength && str.length <= maxLength && !/[<>\"']/g.test(str);
+};
+
 export async function POST(request: NextRequest) {
   try {
-    if (!razorpayInstance) {
+    // Verify request method
+    if (request.method !== "POST") {
       return NextResponse.json(
-        { error: "Razorpay is not configured. Please set RAZORPAY keys in environment variables." },
-        { status: 500 }
+        { error: "Method not allowed" },
+        { status: 405 }
       );
     }
 
-    const body = await request.json();
+    // Verify Razorpay is configured
+    if (!razorpayInstance) {
+      console.error("Razorpay instance not initialized");
+      return NextResponse.json(
+        { error: "Payment service unavailable" },
+        { status: 503 }
+      );
+    }
+
+    // Add security headers
+    const headers = new Headers();
+    headers.set("X-Content-Type-Options", "nosniff");
+    headers.set("X-Frame-Options", "DENY");
+    headers.set("X-XSS-Protection", "1; mode=block");
+
+    let body;
+    try {
+      body = await request.json();
+    } catch {
+      return NextResponse.json(
+        { error: "Invalid request body" },
+        { status: 400, headers }
+      );
+    }
+
     const { trekId, amount, userEmail, userName } = body;
 
+    // Validate all required fields
     if (!trekId || !amount || !userEmail || !userName) {
       return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
+        { error: "Missing required fields: trekId, amount, userEmail, userName" },
+        { status: 400, headers }
+      );
+    }
+
+    // Validate trek ID format (UUID or alphanumeric)
+    if (!isValidString(trekId, 1, 50) || !/^[a-zA-Z0-9\-_]+$/.test(trekId)) {
+      return NextResponse.json(
+        { error: "Invalid trek ID format" },
+        { status: 400, headers }
+      );
+    }
+
+    // Validate amount
+    if (!isValidAmount(amount)) {
+      return NextResponse.json(
+        { error: "Invalid amount. Must be between ₹1 and ₹10,00,000" },
+        { status: 400, headers }
+      );
+    }
+
+    // Validate email
+    if (!isValidEmail(userEmail)) {
+      return NextResponse.json(
+        { error: "Invalid email address" },
+        { status: 400, headers }
+      );
+    }
+
+    // Validate username
+    if (!isValidString(userName, 2, 100)) {
+      return NextResponse.json(
+        { error: "Invalid name. Must be 2-100 characters" },
+        { status: 400, headers }
       );
     }
 
     // Create Razorpay order
     const order = await razorpayInstance.orders.create({
-      amount: amount * 100, // Amount in paise
+      amount: Math.round(amount * 100), // Amount in paise
       currency: "INR",
       receipt: `trek-${trekId}-${Date.now()}`,
+      payment_capture: 1, // Auto-capture payment
       notes: {
         trekId,
         userEmail,
@@ -49,12 +125,27 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    return NextResponse.json(order, { status: 201 });
+    // Validate order creation
+    if (!order || !order.id) {
+      console.error("Order creation failed");
+      return NextResponse.json(
+        { error: "Failed to create payment order" },
+        { status: 500, headers }
+      );
+    }
+
+    return NextResponse.json(order, { status: 201, headers });
   } catch (error) {
-    console.error("Error creating order:", error);
+    // Log error without exposing sensitive details
+    console.error("Order creation error:", error instanceof Error ? error.message : "Unknown error");
+    
     return NextResponse.json(
-      { error: "Failed to create order" },
-      { status: 500 }
+      { error: "Payment service error. Please try again later." },
+      { status: 500, headers: {
+        "X-Content-Type-Options": "nosniff",
+        "X-Frame-Options": "DENY",
+        "X-XSS-Protection": "1; mode=block",
+      }}
     );
   }
 }
