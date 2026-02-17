@@ -121,7 +121,7 @@ export async function POST(request: NextRequest) {
       amount: Math.round(amount * 100), // Amount in paise
       currency: "INR",
       receipt: `trek-${trekId}-${Date.now()}`,
-      payment_capture: 1, // Auto-capture payment
+      payment_capture: true, // Auto-capture payment
       notes: {
         trekId,
         userEmail,
