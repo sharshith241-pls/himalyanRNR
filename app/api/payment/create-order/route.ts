@@ -159,19 +159,32 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json(order, { status: 201, headers });
     } catch (razorpayError) {
-      console.error("Razorpay API error:", {
-        message: razorpayError instanceof Error ? razorpayError.message : String(razorpayError),
-        stack: razorpayError instanceof Error ? razorpayError.stack : "no stack",
+      // Log full error object for Razorpay API errors
+      console.error("Razorpay API error (full):", razorpayError);
+      console.error("Razorpay API error (detailed):", {
+        message: (razorpayError as any)?.message,
+        code: (razorpayError as any)?.code,
+        statusCode: (razorpayError as any)?.statusCode,
+        error: (razorpayError as any)?.error,
+        response: (razorpayError as any)?.response,
+        requestId: (razorpayError as any)?.requestId,
       });
       throw razorpayError;
     }
   } catch (error) {
-    // Log full error for debugging
-    console.error("Order creation error:", {
-      message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack : "no stack",
+    // Log full error for debugging - handle both Error and plain objects
+    const errorDetails = {
+      fullError: error,
+      message: (error as any)?.message,
+      code: (error as any)?.code,
+      statusCode: (error as any)?.statusCode,
+      error: (error as any)?.error,
+      response: (error as any)?.response,
       type: typeof error,
-    });
+      isError: error instanceof Error,
+    };
+    
+    console.error("Order creation error (full):", JSON.stringify(errorDetails, null, 2));
     
     return NextResponse.json(
       { error: "Payment service error. Please try again later." },
