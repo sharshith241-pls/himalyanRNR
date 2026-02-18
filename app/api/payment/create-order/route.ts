@@ -6,10 +6,20 @@ const createRazorpayInstance = () => {
   const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET || process.env.NEXT_PUBLIC_RAZORPAY_KEY_SECRET;
 
-  // Log minimal info for debugging (don't print secrets)
+  // Log detailed info for debugging
+  console.log("=== RAZORPAY ENV DEBUG ===");
+  console.log("Raw NEXT_PUBLIC_RAZORPAY_KEY_ID:", JSON.stringify(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID));
+  console.log("Raw RAZORPAY_KEY_ID:", JSON.stringify(process.env.RAZORPAY_KEY_ID));
+  console.log("Raw RAZORPAY_KEY_SECRET (first 10 chars):", JSON.stringify(process.env.RAZORPAY_KEY_SECRET?.substring(0, 10)));
+  console.log("Raw NEXT_PUBLIC_RAZORPAY_KEY_SECRET (first 10 chars):", JSON.stringify(process.env.NEXT_PUBLIC_RAZORPAY_KEY_SECRET?.substring(0, 10)));
+  
+  console.log("Resolved keyId:", JSON.stringify(keyId));
+  console.log("Resolved keySecret (first 10 chars):", JSON.stringify(keySecret?.substring(0, 10)));
+  
   console.log("Environment check (create-order):", {
     hasKeyId: !!keyId,
     keyIdLength: keyId?.length || 0,
+    keyIdPrefix: keyId?.substring(0, 8) || "none",
     hasKeySecret: !!keySecret,
     keySecretLength: keySecret?.length || 0,
   });
