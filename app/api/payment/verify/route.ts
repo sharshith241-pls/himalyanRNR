@@ -162,7 +162,7 @@ export async function POST(request: NextRequest) {
           razorpay_payment_id: razorpayPaymentId,
           razorpay_signature: razorpaySignature,
           status: "completed",
-          amount: Math.round((order.amount || 0) / 100), // Convert paise to rupees
+          amount: Math.round((Number(order.amount) || 0) / 100), // Convert paise to rupees
           currency: order.currency || "INR",
           created_at: new Date().toISOString(),
         },
