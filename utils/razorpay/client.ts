@@ -38,18 +38,27 @@ export const initiatePayment = async (options: RazorpayOptions) => {
   }
 
   // @ts-ignore
-  const razorpay = new window.Razorpay({
+  const razorpayConfig: any = {
     key_id: options.key_id,
     amount: options.amount,
     currency: options.currency,
     name: options.name,
     description: options.description,
-    order_id: options.order_id,
     prefill: options.prefill || {},
     theme: {
       color: "#10b981", // Emerald/teal color
     },
-  });
+  };
+
+  // Only add optional fields if they exist
+  if (options.order_id) {
+    razorpayConfig.order_id = options.order_id;
+  }
+  if (options.callback_url) {
+    razorpayConfig.callback_url = options.callback_url;
+  }
+
+  const razorpay = new window.Razorpay(razorpayConfig);
 
   razorpay.open();
 };
