@@ -133,34 +133,45 @@ export async function POST(request: NextRequest) {
     console.log("Creating Razorpay order:", { trekId, amount, userEmail });
 
     // Create Razorpay order
-    const order = await razorpayInstance.orders.create({
-      amount: Math.round(amount * 100), // Amount in paise
-      currency: "INR",
-      receipt: `trek-${trekId}-${Date.now()}`,
-      payment_capture: true, // Auto-capture payment
-      notes: {
-        trekId,
-        userEmail,
-        userName,
-      },
-    });
+    try {
+      const order = await razorpayInstance.orders.create({
+        amount: Math.round(amount * 100), // Amount in paise
+        currency: "INR",
+        receipt: `trek-${trekId}-${Date.now()}`,
+        payment_capture: true, // Auto-capture payment
+        notes: {
+          trekId,
+          userEmail,
+          userName,
+        },
+      });
 
-    console.log("Order created successfully:", order.id);
+      console.log("Order created successfully:", order.id);
 
-    // Validate order creation
-    if (!order || !order.id) {
-      console.error("Order creation returned invalid response");
-      return NextResponse.json(
-        { error: "Failed to create payment order" },
-        { status: 500, headers }
-      );
+      // Validate order creation
+      if (!order || !order.id) {
+        console.error("Order creation returned invalid response");
+        return NextResponse.json(
+          { error: "Failed to create payment order" },
+          { status: 500, headers }
+        );
+      }
+
+      return NextResponse.json(order, { status: 201, headers });
+    } catch (razorpayError) {
+      console.error("Razorpay API error:", {
+        message: razorpayError instanceof Error ? razorpayError.message : String(razorpayError),
+        stack: razorpayError instanceof Error ? razorpayError.stack : "no stack",
+      });
+      throw razorpayError;
     }
-
-    return NextResponse.json(order, { status: 201, headers });
   } catch (error) {
-    // Log error without exposing sensitive details
-    const errorMsg = error instanceof Error ? error.message : "Unknown error";
-    console.error("Order creation error:", errorMsg);
+    // Log full error for debugging
+    console.error("Order creation error:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : "no stack",
+      type: typeof error,
+    });
     
     return NextResponse.json(
       { error: "Payment service error. Please try again later." },
