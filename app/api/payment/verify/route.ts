@@ -7,15 +7,33 @@ const createRazorpayInstance = () => {
   const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
   const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
+  // Log all env variables for debugging
+  console.log("Verify endpoint - Environment check:", {
+    hasKeyId: !!keyId,
+    keyIdLength: keyId?.length || 0,
+    hasKeySecret: !!keySecret,
+    keySecretLength: keySecret?.length || 0,
+  });
+
   if (!keyId || !keySecret) {
-    console.error("Razorpay credentials not configured");
+    console.error("Missing Razorpay credentials:", {
+      hasKeyId: !!keyId,
+      hasKeySecret: !!keySecret,
+    });
     return null;
   }
 
-  return new Razorpay({
-    key_id: keyId,
-    key_secret: keySecret,
-  });
+  try {
+    const instance = new Razorpay({
+      key_id: keyId,
+      key_secret: keySecret,
+    });
+    console.log("Razorpay instance created successfully in verify endpoint");
+    return instance;
+  } catch (error) {
+    console.error("Failed to create Razorpay instance:", error instanceof Error ? error.message : error);
+    return null;
+  }
 };
 
 const razorpayInstance = createRazorpayInstance();
