@@ -1,5 +1,5 @@
 interface RazorpayOptions {
-  key_id: string;
+  key_id?: string;
   order_id?: string;
   amount?: number;
   currency?: string;

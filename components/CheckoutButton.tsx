@@ -74,11 +74,17 @@ export default function CheckoutButton({
         throw new Error("Payment service is unavailable. Please try again later.");
       }
 
+      // Check if Razorpay key is configured
+      const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+      if (!razorpayKeyId) {
+        throw new Error("Payment service is not properly configured. Please contact support.");
+      }
+
       // Step 3: Initiate Razorpay payment
       const response = await new Promise((resolve, reject) => {
         try {
           const razorpay = new window.Razorpay({
-            key_id: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+            key_id: razorpayKeyId,
             order_id: orderData.id,
             amount: orderData.amount,
             currency: orderData.currency,
