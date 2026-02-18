@@ -15,6 +15,11 @@ interface RazorpayOptions {
   handler: (response: any) => void;
   modal?: {
     ondismiss?: () => void;
+    confirm_close?: boolean;
+  };
+  retry?: {
+    enabled: boolean;
+    max_count: number;
   };
 }
 
