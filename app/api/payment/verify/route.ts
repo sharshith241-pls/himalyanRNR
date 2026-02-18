@@ -4,10 +4,10 @@ import crypto from "crypto";
 import { createClient } from "@/utils/supabase/server";
 
 const createRazorpayInstance = () => {
-  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  // Accept multiple possible env var names (some setups use NEXT_PUBLIC prefix, some don't)
+  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET || process.env.NEXT_PUBLIC_RAZORPAY_KEY_SECRET;
 
-  // Log all env variables for debugging
   console.log("Verify endpoint - Environment check:", {
     hasKeyId: !!keyId,
     keyIdLength: keyId?.length || 0,
@@ -16,7 +16,7 @@ const createRazorpayInstance = () => {
   });
 
   if (!keyId || !keySecret) {
-    console.error("Missing Razorpay credentials:", {
+    console.error("Missing Razorpay credentials (verify):", {
       hasKeyId: !!keyId,
       hasKeySecret: !!keySecret,
     });
@@ -31,7 +31,7 @@ const createRazorpayInstance = () => {
     console.log("Razorpay instance created successfully in verify endpoint");
     return instance;
   } catch (error) {
-    console.error("Failed to create Razorpay instance:", error instanceof Error ? error.message : error);
+    console.error("Failed to create Razorpay instance (verify):", error instanceof Error ? error.message : error);
     return null;
   }
 };

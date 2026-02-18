@@ -2,11 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import Razorpay from "razorpay";
 
 const createRazorpayInstance = () => {
-  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  // Accept multiple possible env var names (some setups use NEXT_PUBLIC prefix, some don't)
+  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET || process.env.NEXT_PUBLIC_RAZORPAY_KEY_SECRET;
 
-  // Log all env variables for debugging
-  console.log("Environment check:", {
+  // Log minimal info for debugging (don't print secrets)
+  console.log("Environment check (create-order):", {
     hasKeyId: !!keyId,
     keyIdLength: keyId?.length || 0,
     hasKeySecret: !!keySecret,
@@ -14,11 +15,9 @@ const createRazorpayInstance = () => {
   });
 
   if (!keyId || !keySecret) {
-    console.error("Missing Razorpay credentials:", {
+    console.error("Missing Razorpay credentials (create-order):", {
       hasKeyId: !!keyId,
       hasKeySecret: !!keySecret,
-      keyIdValue: keyId || "UNDEFINED",
-      keySecretValue: keySecret || "UNDEFINED",
     });
     return null;
   }
@@ -28,10 +27,10 @@ const createRazorpayInstance = () => {
       key_id: keyId,
       key_secret: keySecret,
     });
-    console.log("Razorpay instance created successfully");
+    console.log("Razorpay instance created successfully (create-order)");
     return instance;
   } catch (error) {
-    console.error("Failed to create Razorpay instance:", error instanceof Error ? error.message : error);
+    console.error("Failed to create Razorpay instance (create-order):", error instanceof Error ? error.message : error);
     return null;
   }
 };
