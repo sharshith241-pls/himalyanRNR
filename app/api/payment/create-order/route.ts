@@ -144,10 +144,15 @@ export async function POST(request: NextRequest) {
 
     // Create Razorpay order
     try {
+      // Generate receipt with max 40 chars (Razorpay requirement)
+      const timestamp = Date.now().toString().slice(-10);
+      const shortTrekId = trekId.substring(0, 8);
+      const receipt = `trek${shortTrekId}${timestamp}`;
+
       const order = await razorpayInstance.orders.create({
         amount: Math.round(amount * 100), // Amount in paise
         currency: "INR",
-        receipt: `trek-${trekId}-${Date.now()}`,
+        receipt: receipt, // Max 40 chars
         payment_capture: true, // Auto-capture payment
         notes: {
           trekId,
