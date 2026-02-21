@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Razorpay from "razorpay";
+import { createClient } from "@/utils/supabase/server";
 
 const createRazorpayInstance = () => {
   // Accept multiple possible env var names (some setups use NEXT_PUBLIC prefix, some don't)
@@ -98,7 +99,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { trekId, amount, userEmail, userName } = body;
+    const { trekId, amount, userEmail, userName, couponCode, userId } = body;
 
     // Validate all required fields
     if (!trekId || !amount || !userEmail || !userName) {
@@ -140,18 +141,81 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("Creating Razorpay payment link:", { trekId, amount, userEmail });
+    // Initialize coupon discount tracking
+    let finalAmount = amount;
+    let discountAmount = 0;
+    let couponId: string | null = null;
+    let couponDiscountPercentage = 0;
+
+    // Handle coupon code if provided
+    if (couponCode) {
+      const supabase = await createClient();
+
+      // Fetch and validate coupon
+      const { data: coupon, error: couponError } = await supabase
+        .from("coupon_codes")
+        .select("*")
+        .eq("code", couponCode.toUpperCase())
+        .eq("is_active", true)
+        .single();
+
+      if (couponError || !coupon) {
+        return NextResponse.json(
+          { success: false, error: "Invalid or inactive coupon code" },
+          { status: 400, headers }
+        );
+      }
+
+      // Check if coupon has expired
+      if (new Date(coupon.estimated_expiry) < new Date()) {
+        return NextResponse.json(
+          { success: false, error: "Coupon code has expired" },
+          { status: 400, headers }
+        );
+      }
+
+      // Check max uses
+      if (coupon.max_uses && coupon.current_uses >= coupon.max_uses) {
+        return NextResponse.json(
+          { success: false, error: "Coupon code has reached maximum uses" },
+          { status: 400, headers }
+        );
+      }
+
+      // Check if coupon is valid for this trek
+      if (coupon.trek_ids && coupon.trek_ids.length > 0 && !coupon.trek_ids.includes(trekId)) {
+        return NextResponse.json(
+          { success: false, error: "This coupon is not valid for this trek" },
+          { status: 400, headers }
+        );
+      }
+
+      // Calculate discount
+      discountAmount = (amount * coupon.discount_percentage) / 100;
+      finalAmount = amount - discountAmount;
+      couponId = coupon.id;
+      couponDiscountPercentage = coupon.discount_percentage;
+
+      console.log("Coupon applied:", {
+        code: coupon.code,
+        discount: coupon.discount_percentage + "%",
+        discountAmount,
+        finalAmount,
+      });
+    }
+
+    console.log("Creating Razorpay payment link:", { trekId, amount, finalAmount, userEmail, appliedCoupon: !!couponCode });
 
     // Create Razorpay Payment Link (Hosted Checkout)
     try {
       const paymentLink = await razorpayInstance.paymentLink.create({
-        amount: Math.round(amount * 100), // Amount in paise
+        amount: Math.round(finalAmount * 100), // Amount in paise (with discount applied)
         currency: "INR",
         customer: {
           name: userName,
           email: userEmail,
         },
-        description: `Trek Booking - ${trekId}`,
+        description: `Trek Booking - ${trekId}${couponCode ? ` (Coupon: ${couponCode})` : ""}`,
         notify: {
           sms: false,
           email: true,
@@ -160,8 +224,14 @@ export async function POST(request: NextRequest) {
           trekId,
           userEmail,
           userName,
+          originalAmount: amount,
+          finalAmount: finalAmount,
+          discountAmount: discountAmount,
+          discountPercentage: couponDiscountPercentage,
+          couponCode: couponCode || null,
+          userId: userId || null,
         },
-        callback_url: `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000"}/success`,
+        callback_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/success`,
         callback_method: "get",
       });
 
@@ -180,6 +250,10 @@ export async function POST(request: NextRequest) {
         id: paymentLink.id,
         short_url: paymentLink.short_url,
         payment_link_url: paymentLink.short_url,
+        originalAmount: amount,
+        finalAmount: finalAmount,
+        discountAmount: discountAmount,
+        couponApplied: !!couponCode,
       }, { status: 201, headers });
     } catch (razorpayError) {
       // Log full error object for Razorpay API errors
