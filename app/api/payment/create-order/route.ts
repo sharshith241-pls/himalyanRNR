@@ -140,39 +140,47 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    console.log("Creating Razorpay order:", { trekId, amount, userEmail });
+    console.log("Creating Razorpay payment link:", { trekId, amount, userEmail });
 
-    // Create Razorpay order
+    // Create Razorpay Payment Link (Hosted Checkout)
     try {
-      // Generate receipt with max 40 chars (Razorpay requirement)
-      const timestamp = Date.now().toString().slice(-10);
-      const shortTrekId = trekId.substring(0, 8);
-      const receipt = `trek${shortTrekId}${timestamp}`;
-
-      const order = await razorpayInstance.orders.create({
+      const paymentLink = await razorpayInstance.paymentLink.create({
         amount: Math.round(amount * 100), // Amount in paise
         currency: "INR",
-        receipt: receipt, // Max 40 chars
-        payment_capture: true, // Auto-capture payment
+        customer: {
+          name: userName,
+          email: userEmail,
+        },
+        description: `Trek Booking - ${trekId}`,
+        notify: {
+          sms: false,
+          email: true,
+        },
         notes: {
           trekId,
           userEmail,
           userName,
         },
+        callback_url: `${process.env.NEXT_PUBLIC_APP_URL || process.env.NEXTAUTH_URL || "http://localhost:3000"}/success`,
+        callback_method: "get",
       });
 
-      console.log("Order created successfully:", order.id);
+      console.log("Payment link created successfully:", paymentLink.short_url);
 
-      // Validate order creation
-      if (!order || !order.id) {
-        console.error("Order creation returned invalid response");
+      // Validate payment link creation
+      if (!paymentLink || !paymentLink.short_url) {
+        console.error("Payment link creation returned invalid response");
         return NextResponse.json(
-          { error: "Failed to create payment order" },
+          { error: "Failed to create payment link" },
           { status: 500, headers }
         );
       }
 
-      return NextResponse.json(order, { status: 201, headers });
+      return NextResponse.json({
+        id: paymentLink.id,
+        short_url: paymentLink.short_url,
+        payment_link_url: paymentLink.short_url,
+      }, { status: 201, headers });
     } catch (razorpayError) {
       // Log full error object for Razorpay API errors
       console.error("Razorpay API error (full):", razorpayError);

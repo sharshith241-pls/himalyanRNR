@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { createOrder, initiatePayment, verifyPayment } from "@/utils/razorpay/client";
 
 interface CheckoutProps {
   trekId: string;
@@ -62,94 +61,36 @@ export default function CheckoutButton({
     setLoading(true);
 
     try {
-      // Step 1: Create order on backend
-      const orderData = await createOrder(trekId, amount, userEmail, userName);
-
-      if (!orderData?.id) {
-        throw new Error("Failed to initialize payment. Please try again.");
-      }
-
-      // Step 2: Verify Razorpay script is loaded
-      if (typeof window === "undefined" || !window.Razorpay) {
-        throw new Error("Payment service is unavailable. Please try again later.");
-      }
-
-      // Check if Razorpay key is configured
-      const razorpayKeyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
-      if (!razorpayKeyId) {
-        throw new Error("Payment service is not properly configured. Please contact support.");
-      }
-
-      // Step 3: Initiate Razorpay payment
-      const response = await new Promise((resolve, reject) => {
-        try {
-          const razorpay = new window.Razorpay({
-            key_id: razorpayKeyId,
-            order_id: orderData.id,
-            amount: orderData.amount,
-            currency: orderData.currency,
-            name: "Himalayan Runners",
-            description: `Trek Booking: ${trekTitle}`,
-            prefill: {
-              name: userName,
-              email: userEmail,
-            },
-            theme: {
-              color: "#10b981",
-            },
-            handler: async (response: any) => {
-              try {
-                // Validate response from Razorpay
-                if (!response?.razorpay_payment_id || !response?.razorpay_signature) {
-                  throw new Error("Invalid payment response. Please contact support.");
-                }
-
-                // Step 4: Verify payment on backend
-                const verificationResult = await verifyPayment(
-                  orderData.id,
-                  response.razorpay_payment_id,
-                  response.razorpay_signature
-                );
-
-                if (verificationResult?.success) {
-                  resolve({
-                    success: true,
-                    data: verificationResult,
-                  });
-                } else {
-                  throw new Error(verificationResult?.error || "Payment verification failed");
-                }
-              } catch (err: any) {
-                reject(err);
-              }
-            },
-            modal: {
-              ondismiss: () => {
-                reject(new Error("Payment cancelled by user"));
-              },
-              confirm_close: true,
-            },
-            retry: {
-              enabled: true,
-              max_count: 3,
-            },
-          });
-
-          razorpay.open();
-        } catch (err) {
-          reject(err);
-        }
+      // Create payment link on backend
+      const response = await fetch("/api/payment/create-order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          trekId,
+          amount,
+          userEmail,
+          userName,
+        }),
       });
 
-      if ((response as any)?.success) {
-        onSuccess?.((response as any).data);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Failed to create payment link");
       }
+
+      const paymentData = await response.json();
+
+      if (!paymentData?.short_url) {
+        throw new Error("Payment link not generated. Please try again.");
+      }
+
+      // Redirect to Razorpay hosted checkout page
+      window.location.href = paymentData.short_url;
     } catch (err: any) {
       const errorMessage = err?.message || "Payment failed. Please try again.";
       console.error("Checkout error:", errorMessage);
       setError(errorMessage);
       onError?.(errorMessage);
-    } finally {
       setLoading(false);
     }
   };
