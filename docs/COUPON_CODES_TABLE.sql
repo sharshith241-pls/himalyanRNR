@@ -53,18 +53,18 @@ CREATE POLICY "Only creator can update their coupon codes"
   ON coupon_codes FOR UPDATE
   USING (auth.uid() = created_by);
 
-CREATE POLICY "Admins can create coupon codes"
+CREATE POLICY "Authenticated users can create coupon codes"
   ON coupon_codes FOR INSERT
-  WITH CHECK (auth.uid() IN (SELECT id FROM auth.users WHERE email IN (SELECT value FROM (SELECT value FROM jsonb_each_text((auth.jwt() -> 'app_metadata'::text)::jsonb)) WHERE key = 'role' AND value = 'admin')));
+  WITH CHECK (auth.uid() IS NOT NULL);
 
 -- Policies for usage logs
 CREATE POLICY "Users can view their own coupon usage"
   ON coupon_usage_logs FOR SELECT
-  USING (auth.uid() = user_id OR auth.uid() IN (SELECT id FROM auth.users WHERE email IN (SELECT value FROM (SELECT value FROM jsonb_each_text((auth.jwt() -> 'app_metadata'::text)::jsonb)) WHERE key = 'role' AND value = 'admin')));
+  USING (auth.uid() = user_id);
 
 CREATE POLICY "Only backend can insert usage logs"
   ON coupon_usage_logs FOR INSERT
-  WITH CHECK (true); -- Controlled by backend API
+  WITH CHECK (true);
 
 -- Insert a sample coupon for testing (optional)
 -- INSERT INTO coupon_codes (code, discount_percentage, created_by, max_uses, notes)

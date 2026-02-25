@@ -208,7 +208,14 @@ export async function POST(request: NextRequest) {
 
     // Create Razorpay Payment Link (Hosted Checkout)
     try {
-      const paymentLink = await razorpayInstance.paymentLink.create({
+      // Get the actual deployed domain from environment variable
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+      
+      // Log environment variable for debugging
+      console.log("Environment check - NEXT_PUBLIC_APP_URL:", appUrl);
+      
+      // Build payment link configuration
+      const paymentLinkConfig: any = {
         amount: Math.round(finalAmount * 100), // Amount in paise (with discount applied)
         currency: "INR",
         customer: {
@@ -231,9 +238,22 @@ export async function POST(request: NextRequest) {
           couponCode: couponCode || null,
           userId: userId || null,
         },
-        callback_url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/success`,
         callback_method: "get",
-      });
+      };
+
+      // IMPORTANT: Only add callback_url if we have a valid production domain
+      // DO NOT fallback to localhost - that breaks production!
+      if (appUrl && !appUrl.includes("localhost") && !appUrl.includes("127.0.0.1")) {
+        paymentLinkConfig.callback_url = `${appUrl}/success`;
+        console.log("✅ Production mode - callback_url set to:", paymentLinkConfig.callback_url);
+      } else {
+        console.warn("⚠️ WARNING: NEXT_PUBLIC_APP_URL is not set or is localhost. Callback URL will not be included.");
+        if (!appUrl) {
+          console.error("❌ ERROR: NEXT_PUBLIC_APP_URL environment variable is missing! Set it in your deployment platform.");
+        }
+      }
+
+      const paymentLink = await razorpayInstance.paymentLink.create(paymentLinkConfig);
 
       console.log("Payment link created successfully:", paymentLink.short_url);
 

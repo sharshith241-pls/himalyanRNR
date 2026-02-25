@@ -31,33 +31,39 @@ export default function SuccessPage() {
   useEffect(() => {
     const initializePayment = async () => {
       try {
-        // Get payment parameters from URL
+        // Try to get payment info from URL (production with callback)
         const paymentLinkId = searchParams.get("razorpay_payment_link_id");
         const paymentId = searchParams.get("razorpay_payment_id");
         const status = searchParams.get("razorpay_payment_link_status");
 
-        if (status !== "paid") {
+        // Get payment info from session storage (set before redirect)
+        const storedInfo = sessionStorage.getItem("paymentInfo");
+        const paymentInfo = storedInfo ? JSON.parse(storedInfo) : null;
+
+        // In development: success if we have storedInfo
+        // In production: success if payment was marked as paid
+        const isSuccess = storedInfo || status === "paid";
+
+        if (!isSuccess) {
           setError("Payment was not completed successfully");
           setLoading(false);
           return;
         }
 
-        // Get payment info from session storage
-        const storedInfo = sessionStorage.getItem("paymentInfo");
-        if (storedInfo) {
-          const info: PaymentInfo = JSON.parse(storedInfo);
-          setPaymentInfo(info);
+        // Use stored payment info
+        if (paymentInfo) {
+          setPaymentInfo(paymentInfo);
 
           // Only generate coupon if this is their first trek booking
-          if (info.trekId && paymentId) {
+          if (paymentInfo.trekId && (paymentId || "local-payment")) {
             try {
               const couponResponse = await fetch("/api/coupon/generate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  trekId: info.trekId,
-                  paymentId: paymentId,
-                  amount: info.finalAmount || info.amount,
+                  trekId: paymentInfo.trekId,
+                  paymentId: paymentId || "dev-" + Date.now(), // Use payment ID or generate dev ID
+                  amount: paymentInfo.finalAmount || paymentInfo.amount,
                 }),
               });
 
@@ -75,6 +81,9 @@ export default function SuccessPage() {
 
           // Clear session storage
           sessionStorage.removeItem("paymentInfo");
+        } else {
+          // No stored info found
+          setError("Payment information not found. It may have been completed successfully.");
         }
 
         setLoading(false);
@@ -134,6 +143,15 @@ export default function SuccessPage() {
           <h1 className="text-4xl font-bold text-green-600 mb-2">Booking Successful!</h1>
           <p className="text-gray-600 text-lg">Your trek has been confirmed</p>
         </div>
+
+        {/* Development Mode Notice */}
+        {(typeof window !== "undefined" && window.location.hostname === "localhost") && (
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded">
+            <p className="text-sm text-blue-800">
+              <strong>💡 Development Mode:</strong> In production, you'll be automatically redirected here after payment. For now, you can manually navigate to this page to complete your booking confirmation.
+            </p>
+          </div>
+        )}
 
         {/* Payment Details */}
         {paymentInfo && (

@@ -136,8 +136,7 @@ export default function CheckoutButton({
         throw new Error("Payment link not generated. Please try again.");
       }
 
-      // Redirect to Razorpay hosted checkout page
-      // Store payment data in sessionStorage for retrieval after redirect
+      // Store payment data in sessionStorage for retrieval after payment
       sessionStorage.setItem(
         "paymentInfo",
         JSON.stringify({
@@ -150,6 +149,15 @@ export default function CheckoutButton({
         })
       );
 
+      // For development mode - add a note about manual navigation
+      const isDevelopment = process.env.NODE_ENV === "development" || 
+                           typeof window !== "undefined" && window.location.hostname === "localhost";
+      
+      if (isDevelopment) {
+        console.log("🔄 Dev Mode: After payment, you'll be redirected to the success page automatically.");
+      }
+
+      // Redirect to Razorpay hosted checkout page
       window.location.href = paymentData.short_url;
     } catch (err: any) {
       const errorMessage = err?.message || "Payment failed. Please try again.";
