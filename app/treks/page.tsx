@@ -38,31 +38,16 @@ export default function TreksPage() {
   const { isAdmin } = useAdminCheck();
 
   useEffect(() => {
-    const getSession = async () => {
-      if (supabase) {
-        try {
-          const { data, error } = await supabase.auth.getSession();
-          
-          if (error || !data?.session) {
-            setSession(null);
-            return;
-          }
-          
-          const { data: { user }, error: userError } = await supabase.auth.getUser();
-          
-          if (userError || !user) {
-            setSession(null);
-            await supabase.auth.signOut();
-          } else {
-            setSession(data.session);
-          }
-        } catch (err) {
-          console.error("Session error:", err);
-          setSession(null);
-        }
-      }
+    // Use onAuthStateChange to securely monitor authentication state
+    // This listener is automatically verified by Supabase
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setSession(session);
+    });
+
+    // Cleanup subscription on unmount
+    return () => {
+      subscription?.unsubscribe();
     };
-    getSession();
   }, []);
 
   useEffect(() => {

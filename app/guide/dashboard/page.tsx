@@ -32,25 +32,27 @@ export default function GuideDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
-    const init = async () => {
-      if (!supabase) {
-        router.push('/guide/login');
-        return;
-      }
-
-      const { data } = await supabase.auth.getSession();
-      const session = data?.session;
+    // Use onAuthStateChange to securely monitor authentication state
+    // Only this listener provides verified session data in client components
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (!session) {
         router.push('/guide/login');
         return;
       }
 
-      const userId = session.user.id;
-      setGuideEmail(session.user.email || '');
-      fetchGuideTreksByUserId(userId);
-    };
+      const userId = session.user?.id;
+      if (!userId) {
+        router.push('/guide/login');
+        return;
+      }
 
-    init();
+      setGuideEmail(session.user?.email || '');
+      fetchGuideTreksByUserId(userId);
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, [router]);
 
   const fetchGuideTreksByUserId = async (userId: string) => {

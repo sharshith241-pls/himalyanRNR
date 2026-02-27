@@ -20,12 +20,24 @@ export default function CouponsPage() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const [newCoupon, setNewCoupon] = useState({
     code: "",
     discount_percentage: 10,
     max_uses: null as number | null,
     notes: "",
   });
+
+  useEffect(() => {
+    // Use onAuthStateChange to securely monitor authentication state
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setUserId(session?.user?.id || null);
+    });
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, []);
 
   useEffect(() => {
     fetchCoupons();
@@ -52,22 +64,19 @@ export default function CouponsPage() {
 
   const handleCreateCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!supabase) return;
+    if (!supabase || !userId) {
+      alert("Must be logged in");
+      return;
+    }
 
     try {
-      const { data: session } = await supabase.auth.getSession();
-      if (!session?.session?.user) {
-        alert("Must be logged in");
-        return;
-      }
-
       const { error } = await supabase.from("coupon_codes").insert([
         {
           code: newCoupon.code.toUpperCase(),
           discount_percentage: newCoupon.discount_percentage,
           max_uses: newCoupon.max_uses,
           notes: newCoupon.notes,
-          created_by: session.session.user.id,
+          created_by: userId,
         },
       ]);
 
