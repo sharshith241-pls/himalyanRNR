@@ -27,18 +27,18 @@ function ResetPasswordContent() {
           return;
         }
         
-        // Wait a moment to allow Supabase to process the recovery token from the URL
+        // Wait a moment to allow Supabase to sync the session from cookies
         await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Get the current session (established by Supabase from the recovery token in the URL)
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
-        if (sessionError || !session) {
+
+        // Verify the session server-side using getUser() (more secure than getSession())
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+        if (userError || !user) {
           setError("Invalid or expired reset link. Please request a new one.");
           setInvalidToken(true);
           return;
         }
-        
+
         // Valid recovery session exists, we're ready
         setIsReady(true);
       } catch (err) {
