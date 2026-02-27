@@ -145,7 +145,15 @@ export default function AdminDashboard() {
             <div className="mt-4 text-emerald-600 font-semibold">View Bookings →</div>
           </Link>
 
-          {/* Manage Guides quick-action removed per request */}
+          <Link
+            href="/admin/coupons"
+            className="bg-white rounded-lg shadow-md p-8 hover:shadow-lg transition-all duration-300 transform hover:scale-105 cursor-pointer border-l-4 border-yellow-600"
+          >
+            <div className="text-4xl mb-4">💰</div>
+            <h3 className="text-xl font-bold text-gray-800 mb-2">Manage Coupons</h3>
+            <p className="text-gray-600">Create and manage discount coupon codes</p>
+            <div className="mt-4 text-yellow-600 font-semibold">View Coupons →</div>
+          </Link>
         </div>
       </div>
     </div>
