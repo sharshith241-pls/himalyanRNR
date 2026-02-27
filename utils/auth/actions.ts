@@ -161,7 +161,7 @@ export async function resetPasswordForEmail(formData: FormData) {
 
     // Email exists, proceed with password reset
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app"}/auth/callback?type=recovery`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app"}/auth/reset-password`,
     });
 
     if (error) {

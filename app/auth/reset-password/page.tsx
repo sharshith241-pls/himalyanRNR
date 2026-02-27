@@ -27,19 +27,13 @@ function ResetPasswordContent() {
           return;
         }
         
-        // Check if we have an active session from the recovery link
+        // Wait a moment to allow Supabase to process the recovery token from the URL
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        // Get the current session (established by Supabase from the recovery token in the URL)
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
         
         if (sessionError || !session) {
-          setError("Invalid or expired reset link. Please request a new one.");
-          setInvalidToken(true);
-          return;
-        }
-        
-        // Verify this is actually a recovery session by checking if the user exists
-        const { data: { user }, error: userError } = await supabase.auth.getUser();
-        
-        if (userError || !user) {
           setError("Invalid or expired reset link. Please request a new one.");
           setInvalidToken(true);
           return;
