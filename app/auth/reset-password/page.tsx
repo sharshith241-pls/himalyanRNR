@@ -24,18 +24,20 @@ function ResetPasswordContent() {
         if (!supabase) {
           setError("Authentication service not available. Please try again.");
           setInvalidToken(true);
+          setIsReady(true);
           return;
         }
         
         // Wait a moment to allow Supabase to process the recovery token from the URL
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Get the current session (established by Supabase from the recovery token in the URL)
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        // Use getUser() instead of getSession() for secure validation against the server
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
         
-        if (sessionError || !session) {
+        if (userError || !user) {
           setError("Invalid or expired reset link. Please request a new one.");
           setInvalidToken(true);
+          setIsReady(true);
           return;
         }
         
@@ -45,6 +47,7 @@ function ResetPasswordContent() {
         console.error("Session check error:", err);
         setError("An error occurred. Please try again.");
         setInvalidToken(true);
+        setIsReady(true);
       }
     };
     
