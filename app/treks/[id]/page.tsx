@@ -40,6 +40,7 @@ export default function TrekDetailPage() {
   const { isAdmin } = useAdminCheck();
 
   useEffect(() => {
+    if (!supabase) return;
     // Use onAuthStateChange to securely monitor authentication state
     // This listener is automatically verified by Supabase
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {

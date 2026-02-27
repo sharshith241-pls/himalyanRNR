@@ -32,6 +32,7 @@ export default function GuideDashboard() {
   const [activeTab, setActiveTab] = useState("overview");
 
   useEffect(() => {
+    if (!supabase) return;
     // Use onAuthStateChange to securely monitor authentication state
     // Only this listener provides verified session data in client components
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {

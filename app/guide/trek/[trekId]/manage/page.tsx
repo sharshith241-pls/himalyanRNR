@@ -40,6 +40,7 @@ export default function GuideManageTrek() {
   const [uploadingImage, setUploadingImage] = useState(false);
 
   useEffect(() => {
+    if (!supabase) return;
     // Use onAuthStateChange to securely monitor authentication state
     // Only this listener provides verified session data in client components
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
