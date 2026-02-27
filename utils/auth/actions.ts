@@ -161,7 +161,7 @@ export async function resetPasswordForEmail(formData: FormData) {
 
     // Email exists, proceed with password reset
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app"}/auth/callback`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app"}/auth/callback?type=recovery`,
     });
 
     if (error) {
@@ -206,6 +206,22 @@ export async function updatePassword(newPassword: string) {
       message: "Password updated successfully! Please sign in with your new password.",
       requiresReLogin: true 
     };
+  } catch (error) {
+    return { success: false, error: getErrorMessage(error) };
+  }
+}
+
+export async function signOut() {
+  try {
+    const supabase = await createClient();
+    
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      return { success: false, error: getErrorMessage(error) };
+    }
+    
+    return { success: true, message: "Signed out successfully" };
   } catch (error) {
     return { success: false, error: getErrorMessage(error) };
   }

@@ -27,8 +27,16 @@ function ResetPasswordContent() {
           return;
         }
         
-        // Simply check if we can get the current user
-        // If we can, we have a valid recovery session
+        // Check if we have an active session from the recovery link
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError || !session) {
+          setError("Invalid or expired reset link. Please request a new one.");
+          setInvalidToken(true);
+          return;
+        }
+        
+        // Verify this is actually a recovery session by checking if the user exists
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         
         if (userError || !user) {
@@ -90,9 +98,16 @@ function ResetPasswordContent() {
         // Clear any cached auth state and force a hard redirect
         // Wait a bit to show success message
         setTimeout(() => {
-          // Clear local storage/session storage of auth data
+          // Clear all browser storage to ensure clean session
           if (typeof window !== 'undefined') {
+            // Clear localStorage
+            localStorage.clear();
+            // Clear sessionStorage
             sessionStorage.clear();
+            // Clear all cookies (for auth session)
+            document.cookie.split(";").forEach((c) => {
+              document.cookie = c.replace(/^ +/, "").replace(/=.*/, `=;expires=${new Date().toUTCString()};path=/`);
+            });
             // Force hard redirect to ensure fresh page load
             window.location.href = "/auth/login?reset=success";
           }

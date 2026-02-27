@@ -53,9 +53,13 @@ export default function ForgotPasswordPage() {
       <h1 className="text-3xl font-bold text-center mb-2">
         Reset Password
       </h1>
-      <p className="text-center text-gray-600 mb-8">
+      <p className="text-center text-gray-600 mb-4">
         Enter your email to receive a password reset link
       </p>
+      
+      <div className="text-center text-sm bg-blue-50 border border-blue-200 text-blue-700 rounded-md p-3 mb-6">
+        <strong>ℹ️ Note:</strong> Password reset links are only sent to registered accounts. Check your email (including spam folder) for the reset link.
+      </div>
 
       {error && (
         <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-700 rounded-md text-sm">
@@ -66,6 +70,9 @@ export default function ForgotPasswordPage() {
       {success && (
         <div className="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-md text-sm">
           {success}
+          <div className="mt-2 text-sm font-medium">
+            ✓ Please check your email (including spam/junk folder) for the reset link. The link expires in 24 hours.
+          </div>
         </div>
       )}
 

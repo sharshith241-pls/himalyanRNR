@@ -33,9 +33,13 @@ export async function GET(request: Request) {
     }
 
     // Check if this is a password recovery flow
-    if (searchParams.get("type") === "recovery") {
-      // Redirect to reset password page
+    // Recovery type can come from the redirect URL or be inferred from the context
+    const isRecoveryFlow = searchParams.get("type") === "recovery";
+    
+    if (isRecoveryFlow) {
+      // For password recovery, redirect to reset password page
       // The session cookies are already set by exchangeCodeForSession
+      // The user will provide their new password on the reset page
       return NextResponse.redirect(
         new URL("/auth/reset-password", request.url)
       );
@@ -71,7 +75,7 @@ export async function GET(request: Request) {
       }
     }
 
-    // Redirect to home page after successful authentication
+    // Redirect to home page after successful authentication (non-recovery flow)
     return NextResponse.redirect(new URL("/", request.url));
   } catch (err) {
     console.error("Auth callback error:", err);
