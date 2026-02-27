@@ -160,8 +160,10 @@ export async function resetPasswordForEmail(formData: FormData) {
     }
 
     // Email exists, proceed with password reset
+    // redirectTo must go through /auth/callback with type=recovery so the PKCE
+    // code is exchanged before the user lands on the reset-password page.
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app"}/auth/reset-password`,
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app"}/auth/callback?type=recovery`,
     });
 
     if (error) {
@@ -181,10 +183,11 @@ export async function updatePassword(newPassword: string) {
   try {
     const supabase = await createClient();
 
-    // IMPORTANT: Must have a valid recovery session from reset link
-    const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+    // IMPORTANT: Must have a valid recovery session from reset link.
+    // Use getUser() (not getSession()) to verify the JWT against Supabase servers.
+    const { data: userData, error: userError } = await supabase.auth.getUser();
     
-    if (sessionError || !sessionData.session) {
+    if (userError || !userData.user) {
       return { success: false, error: "Invalid or expired reset link. Please request a new one." };
     }
 

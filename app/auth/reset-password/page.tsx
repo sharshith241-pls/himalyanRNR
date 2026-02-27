@@ -30,10 +30,11 @@ function ResetPasswordContent() {
         // Wait a moment to allow Supabase to process the recovery token from the URL
         await new Promise(resolve => setTimeout(resolve, 500));
         
-        // Get the current session (established by Supabase from the recovery token in the URL)
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        // Use getUser() instead of getSession() – it validates the JWT against the
+        // Supabase server and is the recommended secure check.
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
         
-        if (sessionError || !session) {
+        if (userError || !user) {
           setError("Invalid or expired reset link. Please request a new one.");
           setInvalidToken(true);
           return;
