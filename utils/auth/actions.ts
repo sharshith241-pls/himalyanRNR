@@ -6,10 +6,11 @@ import { getErrorMessage } from "./helpers";
 export async function signInWithGoogle() {
   try {
     const supabase = await createClient();
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app";
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app"}/auth/callback`,
+        redirectTo: `${siteUrl}/auth/callback`,
       },
     });
 
@@ -30,13 +31,14 @@ export async function signUp(formData: FormData) {
 
   try {
     const supabase = await createClient();
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app";
 
     // Sign up with email confirmation disabled - we'll handle verification manually
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app"}/auth/verify-email?email=${encodeURIComponent(email)}`,
+        emailRedirectTo: `${siteUrl}/auth/verify-email?email=${encodeURIComponent(email)}`,
         data: {
           full_name: fullName,
         },
@@ -159,8 +161,9 @@ export async function resetPasswordForEmail(formData: FormData) {
       };
     }
 
-    // Email exists, proceed with password reset
+    // EmasiteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app";
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${siteUrl
       redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app"}/auth/reset-password`,
     });
 
