@@ -102,11 +102,30 @@ export default function HomePage() {
   };
 
   const handleLogout = async () => {
+    // Clear session state immediately for responsive UI
+    setSession(null);
+    
+    // Clear all Supabase cookies locally as fallback
+    document.cookie.split(';').forEach(c => {
+      const name = c.trim().split('=')[0];
+      if (name.includes('supabase') || name.includes('sb-')) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+      }
+    });
+    
     if (supabase) {
-      await supabase.auth.signOut();
-      setSession(null);
-      window.location.reload();
+      try {
+        // Add timeout to prevent hanging if Supabase is unreachable
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Logout timeout')), 3000)
+        );
+        await Promise.race([supabase.auth.signOut(), timeoutPromise]);
+      } catch (e) {
+        console.warn('Logout timed out, proceeding with local cleanup');
+      }
     }
+    
+    window.location.href = '/';
   };
 
   return (

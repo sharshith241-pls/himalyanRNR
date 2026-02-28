@@ -61,11 +61,19 @@ export default function TreksPage() {
           return;
         }
 
-        const { data, error: queryError } = await supabase
+        // Add timeout to prevent hanging if Supabase is unreachable
+        const timeoutPromise = new Promise<{ data: null; error: Error }>((_, reject) =>
+          setTimeout(() => reject(new Error('Supabase request timeout')), 8000)
+        );
+
+        const queryPromise = supabase
           .from("treks")
           .select("*");
 
+        const { data, error: queryError } = await Promise.race([queryPromise, timeoutPromise]);
+
         if (queryError) {
+          console.warn('Trek fetch error:', queryError);
           setTreks(DEMO_TREKS);
         } else if (data && data.length > 0) {
           setTreks(data);
@@ -73,6 +81,7 @@ export default function TreksPage() {
           setTreks(DEMO_TREKS);
         }
       } catch (err) {
+        console.warn('Trek fetch failed:', err);
         setTreks(DEMO_TREKS);
       } finally {
         setLoading(false);
@@ -121,11 +130,30 @@ export default function TreksPage() {
   };
 
   const handleLogout = async () => {
+    // Clear session state immediately for responsive UI
+    setSession(null);
+    
+    // Clear all Supabase cookies locally as fallback
+    document.cookie.split(';').forEach(c => {
+      const name = c.trim().split('=')[0];
+      if (name.includes('supabase') || name.includes('sb-')) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+      }
+    });
+    
     if (supabase) {
-      await supabase.auth.signOut();
-      setSession(null);
-      window.location.reload();
+      try {
+        // Add timeout to prevent hanging if Supabase is unreachable
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Logout timeout')), 3000)
+        );
+        await Promise.race([supabase.auth.signOut(), timeoutPromise]);
+      } catch (e) {
+        console.warn('Logout timed out, proceeding with local cleanup');
+      }
     }
+    
+    window.location.href = '/';
   };
 
   return (
