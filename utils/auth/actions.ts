@@ -161,10 +161,10 @@ export async function resetPasswordForEmail(formData: FormData) {
       };
     }
 
-    // EmasiteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app";
+    // Email exists, proceed with password reset
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app";
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${siteUrl
-      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app"}/auth/reset-password`,
+      redirectTo: `${siteUrl}/auth/reset-password`,
     });
 
     if (error) {
