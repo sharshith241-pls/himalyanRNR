@@ -6,7 +6,7 @@ import { cookies } from "next/headers";
 const stripQuotes = (s: string) => s.trim().replace(/^"+|"+$/g, "").replace(/^'+|'+$/g, "");
 
 const rawSupabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const rawSupabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ?? "";
+const rawSupabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 const rawSupabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY ?? "";
 
 const supabaseUrl = stripQuotes(rawSupabaseUrl);
@@ -16,7 +16,7 @@ const supabaseServiceRoleKey = stripQuotes(rawSupabaseServiceRoleKey);
 export const createClient = async () => {
   if (!supabaseUrl || !supabaseKey) {
     throw new Error(
-      "Missing Supabase environment variables. Please ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY are set (no surrounding quotes)."
+      "Missing Supabase environment variables. Please ensure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are set (no surrounding quotes)."
     );
   }
 

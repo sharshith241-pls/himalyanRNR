@@ -1,7 +1,7 @@
 import { createBrowserClient } from "@supabase/ssr";
 
 const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const rawKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY ?? "";
+const rawKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
 
 const stripQuotes = (s: string) => s.trim().replace(/^"+|"+$/g, "").replace(/^'+|'+$/g, "");
 
@@ -10,7 +10,7 @@ const supabaseAnonKey = stripQuotes(rawKey);
 
 if ((!supabaseUrl || !supabaseAnonKey) && typeof window !== "undefined") {
   console.warn(
-    "Supabase client not initialized: missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY. Check environment variables (remove surrounding quotes)."
+    "Supabase client not initialized: missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. Check environment variables (remove surrounding quotes)."
   );
 }
 
