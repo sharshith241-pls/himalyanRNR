@@ -31,14 +31,13 @@ export async function signUp(formData: FormData) {
 
   try {
     const supabase = await createClient();
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://himalyanrunner.vercel.app";
+    const admin = createServiceRoleClient();
 
-    // Sign up with email confirmation disabled - we'll handle verification manually
+    // Sign up user - email verification is disabled in Supabase settings
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: `${siteUrl}/auth/verify-email?email=${encodeURIComponent(email)}`,
         data: {
           full_name: fullName,
         },
@@ -49,10 +48,27 @@ export async function signUp(formData: FormData) {
       return { success: false, error: getErrorMessage(error) };
     }
 
-    // Return success with email - user needs to verify before account is fully active
+    // Create profile immediately since email verification is disabled
+    if (data.user?.id) {
+      try {
+        await admin.from("profiles").insert([
+          {
+            id: data.user.id,
+            email: email,
+            full_name: fullName,
+            role: "user",
+            created_at: new Date().toISOString(),
+          },
+        ]);
+      } catch (profileErr) {
+        console.error("Profile creation error:", profileErr);
+        // Don't fail signup if profile creation fails
+      }
+    }
+
     return {
       success: true,
-      message: "Account created! Please verify your email to continue.",
+      message: "Account created successfully! Redirecting to login...",
       email: email,
       userId: data.user?.id,
     };

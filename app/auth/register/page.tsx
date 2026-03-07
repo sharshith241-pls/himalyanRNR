@@ -67,9 +67,9 @@ export default function RegisterPage() {
         setEmail("");
         setPassword("");
         setConfirmPassword("");
-        // Redirect to email verification page
+        // Redirect to login page (email verification is disabled)
         setTimeout(() => {
-          router.push(`/auth/verify-email?email=${encodeURIComponent(email)}`);
+          router.push("/auth/login");
         }, 1500);
       } else {
         setError(result.error || "Registration failed");
