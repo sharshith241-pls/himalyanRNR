@@ -19,23 +19,16 @@ export default async function GuideLayout({ children }: { children: React.ReactN
     redirect('/guide/login');
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role,approved')
-    .eq('id', session.user.id)
-    .single();
+  // Get role and approved status from user metadata
+  const role = session.user.user_metadata?.role || 'user';
+  const approved = session.user.user_metadata?.approved || false;
 
-  if (!profile) {
-    // No profile found — require signup
-    redirect('/auth/register');
-  }
-
-  if (profile.role !== 'guide') {
+  if (role !== 'guide') {
     // Not a guide
     redirect('/');
   }
 
-  if (!profile.approved) {
+  if (!approved) {
     // Guide not yet approved
     redirect('/pending-approval');
   }

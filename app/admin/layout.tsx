@@ -1,4 +1,4 @@
-import { createClient, createServiceRoleClient } from '@/utils/supabase/server';
+import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
 // Prevent static generation - requires runtime env vars
@@ -17,21 +17,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (!session) redirect('/auth/login');
 
-  // Use service-role client to bypass RLS policies
-  const admin = createServiceRoleClient();
-  const { data: profile, error } = await admin
-    .from('profiles')
-    .select('role')
-    .eq('id', session.user.id)
-    .single();
+  // Check role from user metadata
+  const role = session.user.user_metadata?.role || 'user';
 
-  if (error) {
-    console.error('Error fetching admin profile:', error);
-    redirect('/');
-  }
-
-  if (!profile || profile.role !== 'admin') {
-    console.log('User role:', profile?.role, '- Not admin, redirecting');
+  if (role !== 'admin') {
+    console.log('User role:', role, '- Not admin, redirecting');
     redirect('/');
   }
 

@@ -39,6 +39,8 @@ export async function signUp(formData: FormData) {
       options: {
         data: {
           full_name: fullName,
+          role: 'user',
+          approved: false,
         },
       },
     });
