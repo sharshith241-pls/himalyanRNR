@@ -17,8 +17,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   if (!session) redirect('/auth/login');
 
-  // Check role from user metadata
-  const role = session.user.user_metadata?.role || 'user';
+  // Check role from profiles table (not user_metadata)
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', session.user.id)
+    .single();
+
+  const role = profile?.role || 'user';
 
   if (role !== 'admin') {
     console.log('User role:', role, '- Not admin, redirecting');
