@@ -31,7 +31,6 @@ export async function signUp(formData: FormData) {
 
   try {
     const supabase = await createClient();
-    const admin = createServiceRoleClient();
 
     // Sign up user - email verification is disabled in Supabase settings
     const { data, error } = await supabase.auth.signUp({
@@ -48,24 +47,7 @@ export async function signUp(formData: FormData) {
       return { success: false, error: getErrorMessage(error) };
     }
 
-    // Create profile immediately since email verification is disabled
-    if (data.user?.id) {
-      try {
-        await admin.from("profiles").insert([
-          {
-            id: data.user.id,
-            email: email,
-            full_name: fullName,
-            role: "user",
-            created_at: new Date().toISOString(),
-          },
-        ]);
-      } catch (profileErr) {
-        console.error("Profile creation error:", profileErr);
-        // Don't fail signup if profile creation fails
-      }
-    }
-
+    // Profile is automatically created by the Supabase trigger (handle_new_user)
     return {
       success: true,
       message: "Account created successfully! Redirecting to login...",
