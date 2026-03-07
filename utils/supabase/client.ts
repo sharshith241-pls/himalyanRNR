@@ -1,35 +1,45 @@
 import { createBrowserClient } from "@supabase/ssr";
-
-const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-const rawKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const stripQuotes = (s: string) => s.trim().replace(/^"+|"+$/g, "").replace(/^'+|'+$/g, "");
 
-const supabaseUrl = stripQuotes(rawUrl);
-const supabaseAnonKey = stripQuotes(rawKey);
+// Lazy initialization - only create client when first accessed at runtime
+let _supabase: SupabaseClient | null = null;
 
-if ((!supabaseUrl || !supabaseAnonKey) && typeof window !== "undefined") {
-  console.warn(
-    "Supabase client not initialized: missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY. Check environment variables (remove surrounding quotes)."
-  );
+function getSupabaseClient(): SupabaseClient | null {
+  // Return cached client if already created
+  if (_supabase) return _supabase;
+  
+  // Only create client in browser environment
+  if (typeof window === "undefined") return null;
+  
+  const rawUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const rawKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ?? "";
+  
+  const supabaseUrl = stripQuotes(rawUrl);
+  const supabaseAnonKey = stripQuotes(rawKey);
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.warn(
+      "Supabase client not initialized: missing NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_ANON_KEY."
+    );
+    return null;
+  }
+
+  _supabase = createBrowserClient(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      flowType: "pkce",
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      persistSession: true,
+    },
+  });
+
+  return _supabase;
 }
 
-export const supabase =
-  supabaseUrl && supabaseAnonKey
-    ? createBrowserClient(supabaseUrl, supabaseAnonKey, {
-        auth: {
-          flowType: "pkce",
-          autoRefreshToken: true,
-          detectSessionInUrl: true,
-          persistSession: true,
-        },
-      })
-    : null;
+// Export a getter that lazily initializes the client
+export const supabase = typeof window !== "undefined" ? getSupabaseClient() : null;
 
-if (typeof window !== "undefined" && supabaseUrl) {
-  // Temporary debug: print only the URL (never the anon key) so we can confirm
-  // which Supabase domain the browser-side bundle is using.
-  // Remove this after debugging.
-  // eslint-disable-next-line no-console
-  console.debug("Supabase URL (browser):", supabaseUrl);
-}
+// Also export the getter function for cases where you need fresh access
+export { getSupabaseClient };

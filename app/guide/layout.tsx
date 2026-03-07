@@ -1,6 +1,9 @@
 import { createClient } from '@/utils/supabase/server';
 import { redirect } from 'next/navigation';
 
+// Prevent static generation - requires runtime env vars
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: 'Guide Portal',
 };
