@@ -29,6 +29,7 @@ export default function CouponsPage() {
   });
 
   useEffect(() => {
+    if (!supabase) return;
     // Use onAuthStateChange to securely monitor authentication state
     if (!supabase) return;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
