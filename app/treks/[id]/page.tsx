@@ -223,11 +223,10 @@ export default function TrekDetailPage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {[
                 { icon: "⏱️", label: "Duration", value: trek.duration },
                 { icon: "📈", label: "Difficulty", value: trek.difficulty },
-                { icon: "👥", label: "Max Group", value: `${trek.max_participants} people` },
                 { icon: "📍", label: "Location", value: trek.location },
               ].map((stat, i) => (
                 <div key={i} className="bg-gradient-to-br from-teal-50 to-blue-50 p-4 rounded-lg border-2 border-teal-200">
