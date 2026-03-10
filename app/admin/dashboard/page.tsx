@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabase/client";
 import Link from "next/link";
 
@@ -20,6 +21,13 @@ export default function AdminDashboard() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    if (!supabase) return;
+    await supabase.auth.signOut();
+    router.push("/auth/login");
+  };
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -67,9 +75,17 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white py-8 shadow-lg">
-        <div className="max-w-7xl mx-auto px-4">
-          <h1 className="text-4xl font-bold">📊 Admin Dashboard</h1>
-          <p className="text-teal-100 mt-2">Welcome to the Himalayan Runner Admin Portal</p>
+        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
+          <div>
+            <h1 className="text-4xl font-bold">📊 Admin Dashboard</h1>
+            <p className="text-teal-100 mt-2">Welcome to the Himalayan Runner Admin Portal</p>
+          </div>
+          <button
+            onClick={handleLogout}
+            className="bg-white/20 hover:bg-white/30 text-white px-5 py-2 rounded-lg font-semibold transition backdrop-blur-sm border border-white/30"
+          >
+            Logout
+          </button>
         </div>
       </div>
 
