@@ -43,6 +43,11 @@ textarea {
     width: auto;
   }
 
+  .site-nav-brand {
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+
   .site-nav-links {
     min-width: 0;
     flex: 1 1 auto;

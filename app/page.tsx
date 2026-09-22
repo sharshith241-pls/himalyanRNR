@@ -146,18 +146,18 @@ export default function HomePage() {
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
         <div className="site-nav-inner max-w-7xl mx-auto px-4 py-3 sm:py-4 flex justify-between items-center">
-          <Link href="/" className="site-nav-logo flex items-center hover:opacity-80 transition">
+          <Link href="/" className="site-nav-logo flex items-center gap-2 hover:opacity-80 transition">
             <img 
               src="/himalayan_runners_logo.jpeg"
               alt="Himalayan Runners Logo" 
               className="h-10 sm:h-12 w-auto object-contain"
             />
+            <span className="site-nav-brand text-lg sm:text-xl font-black tracking-tight text-gray-900 whitespace-nowrap">
+              Himalayan Runners
+            </span>
           </Link>
 
           <div className="site-nav-links flex gap-6 items-center">
-            <Link href="/" className="text-gray-700 hover:text-teal-600 font-medium transition">
-              Home
-            </Link>
             <Link href="/treks" className="text-gray-700 hover:text-teal-600 font-medium transition">
               Explore Treks
             </Link>
@@ -183,14 +183,8 @@ export default function HomePage() {
             ) : (
               <>
                 <Link
-                  href="/auth/login"
-                  className="text-gray-700 hover:text-teal-600 font-medium transition"
-                >
-                  Log in
-                </Link>
-                <Link
                   href="/auth/register"
-                  className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white px-6 py-2 rounded-lg hover:shadow-lg transition"
+                  className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white px-5 sm:px-6 py-2 rounded-lg hover:shadow-lg transition font-semibold"
                 >
                   Sign up
                 </Link>
