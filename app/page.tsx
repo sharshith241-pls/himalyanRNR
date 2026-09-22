@@ -145,8 +145,8 @@ export default function HomePage() {
 
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex justify-between items-center">
-          <Link href="/" className="flex items-center hover:opacity-80 transition">
+        <div className="site-nav-inner max-w-7xl mx-auto px-4 py-3 sm:py-4 flex justify-between items-center">
+          <Link href="/" className="site-nav-logo flex items-center hover:opacity-80 transition">
             <img 
               src="/himalayan_runners_logo.jpeg"
               alt="Himalayan Runners Logo" 
@@ -154,7 +154,7 @@ export default function HomePage() {
             />
           </Link>
 
-          <div className="flex gap-6 items-center">
+          <div className="site-nav-links flex gap-6 items-center">
             <Link href="/" className="text-gray-700 hover:text-teal-600 font-medium transition">
               Home
             </Link>
