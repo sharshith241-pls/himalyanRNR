@@ -160,9 +160,9 @@ export default function TreksPage() {
     <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex justify-between items-center">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
-            <img src="/logoo.jpeg" alt="Himalayan Runners" className="h-12 w-auto" />
+            <img src="/logoo.jpeg" alt="Himalayan Runners" className="h-10 sm:h-12 w-auto" />
           </Link>
 
           <div className="flex gap-6 items-center">
@@ -212,17 +212,17 @@ export default function TreksPage() {
       {/* Hero Section */}
       <section className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-black mb-4">All Adventures</h1>
-          <p className="text-xl font-semibold">Choose your next unforgettable journey</p>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-4">All Adventures</h1>
+          <p className="text-lg sm:text-xl font-semibold">Choose your next unforgettable journey</p>
         </div>
       </section>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 py-12">
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12">
         <div className="grid lg:grid-cols-4 gap-8">
           {/* Filters Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-md p-6 sticky top-24 space-y-6">
+            <div className="bg-white rounded-lg shadow-md p-4 sm:p-6 lg:sticky lg:top-24 space-y-6">
               <div>
                 <h3 className="font-black text-xl mb-4 text-gray-900">🔍 Search</h3>
                 <input
@@ -316,7 +316,7 @@ export default function TreksPage() {
                     </div>
 
                     {/* Info */}
-                    <div className="p-6">
+                    <div className="p-4 sm:p-6">
                       <h3 className="font-black text-2xl text-gray-900 mb-4 line-clamp-2 group-hover:text-teal-600 transition leading-tight">
                         {trek.title}
                       </h3>
@@ -336,7 +336,7 @@ export default function TreksPage() {
                       </div>
 
                       {/* Price */}
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-gray-200">
                         <div className="flex items-center gap-2">
                           <span className="text-2xl font-bold text-teal-600">
                             ₹{trek.price.toLocaleString("en-IN")}

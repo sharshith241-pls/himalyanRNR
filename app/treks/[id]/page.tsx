@@ -146,12 +146,12 @@ export default function TrekDetailPage() {
     <div className="min-h-screen bg-white">
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex justify-between items-center">
           <Link href="/" className="flex items-center gap-3 hover:opacity-80 transition">
             <img src="/logoo.jpeg" alt="Himalayan Runners" className="h-12 w-auto" />
           </Link>
 
-          <div className="flex gap-6 items-center">
+          <div className="flex gap-3 sm:gap-6 items-center flex-wrap justify-end">
             <Link href="/" className="text-gray-700 hover:text-teal-600 font-medium transition">
               Home
             </Link>
@@ -212,7 +212,7 @@ export default function TrekDetailPage() {
           </div>
         )}
         <div className="relative text-center text-white max-w-4xl px-4">
-          <h1 className="text-5xl md:text-6xl font-black mb-4">{trek.title}</h1>
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-black mb-4">{trek.title}</h1>
           <p className="text-xl font-semibold">{trek.location}</p>
         </div>
       </section>
@@ -239,13 +239,13 @@ export default function TrekDetailPage() {
 
             {/* Description */}
             <div>
-              <h2 className="text-4xl font-black mb-4 text-gray-900">About This Trek</h2>
+              <h2 className="text-3xl md:text-4xl font-black mb-4 text-gray-900">About This Trek</h2>
               <p className="text-gray-800 text-lg leading-relaxed font-medium">{trek.description}</p>
             </div>
 
             {/* Itinerary */}
             <div>
-              <h2 className="text-4xl font-black mb-4 text-gray-900">📋 Itinerary</h2>
+              <h2 className="text-3xl md:text-4xl font-black mb-4 text-gray-900">📋 Itinerary</h2>
               <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-lg border-l-4 border-teal-600 border-2 border-t-0 border-r-0 border-b-0">
                 <p className="text-gray-800 whitespace-pre-line leading-relaxed font-medium text-base">{trek.itinerary}</p>
               </div>

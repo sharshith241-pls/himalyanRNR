@@ -145,12 +145,12 @@ export default function HomePage() {
 
       {/* Navigation */}
       <nav className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex justify-between items-center">
           <Link href="/" className="flex items-center hover:opacity-80 transition">
             <img 
               src="/logoo.jpeg" 
               alt="Himalayan Runners Logo" 
-              className="h-12 w-auto"
+              className="h-10 sm:h-12 w-auto"
             />
           </Link>
 
@@ -204,23 +204,23 @@ export default function HomePage() {
       <section className="relative bg-gradient-to-br from-slate-900 via-teal-900 to-slate-900 text-white py-20 overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/5 bg-[size:60px_60px] pointer-events-none" />
         <div className="relative max-w-7xl mx-auto px-4 text-center">
-          <div className="animate-fade-in space-y-6">
-            <h2 className="text-5xl md:text-7xl font-black text-white drop-shadow-lg">
+          <div className="animate-fade-in space-y-5 sm:space-y-6">
+            <h2 className="text-4xl sm:text-5xl md:text-7xl font-black text-white drop-shadow-lg">
               Explore the Himalayas
             </h2>
-            <p className="text-2xl text-white max-w-2xl mx-auto font-bold drop-shadow-md">
+            <p className="text-lg sm:text-2xl text-white max-w-2xl mx-auto font-bold drop-shadow-md">
               Discover breathtaking mountain trails, connect with nature, and create unforgettable memories with Himalayan Runners
             </p>
             <div className="flex gap-4 justify-center flex-wrap">
               <Link
                 href="/treks"
-                className="bg-white text-teal-600 px-8 py-4 rounded-lg font-bold hover:shadow-2xl transition transform hover:scale-105"
+                className="bg-white text-teal-600 px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold hover:shadow-2xl transition transform hover:scale-105"
               >
                 Start Exploring
               </Link>
               <Link
                 href="#treks"
-                className="border-2 border-white text-white px-8 py-4 rounded-lg font-bold hover:bg-white hover:text-teal-600 transition"
+                className="border-2 border-white text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold hover:bg-white hover:text-teal-600 transition"
               >
                 Learn More
               </Link>
@@ -230,16 +230,16 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-12 sm:py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
-          <h3 className="text-4xl font-black text-center mb-12 text-gray-900">Why Choose Himalayan Runners?</h3>
+          <h3 className="text-3xl sm:text-4xl font-black text-center mb-8 sm:mb-12 text-gray-900">Why Choose Himalayan Runners?</h3>
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { icon: "🏆", title: "Expert Guides", desc: "Experienced mountain guides with years of expertise" },
               { icon: "🛡️", title: "Safe & Secure", desc: "Top-notch safety equipment and protocols" },
               { icon: "👥", title: "Community", desc: "Join thousands of adventure enthusiasts" },
             ].map((feature, i) => (
-              <div key={i} className="bg-white p-8 rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-1 border-t-4 border-teal-600">
+              <div key={i} className="bg-white p-6 sm:p-8 rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-1 border-t-4 border-teal-600">
                 <div className="text-5xl mb-4">{feature.icon}</div>
                 <h4 className="text-2xl font-black mb-3 text-gray-900">{feature.title}</h4>
                 <p className="text-gray-700 font-medium text-base leading-relaxed">{feature.desc}</p>
@@ -250,16 +250,16 @@ export default function HomePage() {
       </section>
 
       {/* Category Filters */}
-      <section id="treks" className="py-16">
+      <section id="treks" className="py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="text-5xl font-black text-center mb-12 text-gray-900">Explore by Category</h2>
+          <h2 className="text-3xl sm:text-5xl font-black text-center mb-8 sm:mb-12 text-gray-900">Explore by Category</h2>
 
-          <div className="flex flex-wrap justify-center gap-3 mb-12">
+          <div className="flex flex-wrap justify-start sm:justify-center gap-3 mb-8 sm:mb-12">
             {CATEGORIES.map((category) => (
               <button
                 key={category.id}
                 onClick={() => handleCategoryChange(category.id)}
-                className={`px-6 py-3 rounded-full font-semibold transition transform hover:scale-105 ${
+                className={`px-4 sm:px-6 py-3 rounded-full font-semibold transition transform hover:scale-105 ${
                   selectedCategory === category.id
                     ? "bg-gradient-to-r from-teal-500 to-emerald-500 text-white shadow-lg"
                     : "bg-white text-gray-700 border-2 border-gray-200 hover:border-teal-500"
@@ -344,10 +344,10 @@ export default function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white py-16">
+      <section className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white py-12 sm:py-16">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <h2 className="text-5xl font-black mb-4">Ready for Your Adventure?</h2>
-          <p className="text-xl mb-8 font-semibold">Join thousands of trekkers who have experienced the magic of the Himalayas</p>
+          <h2 className="text-3xl sm:text-5xl font-black mb-4">Ready for Your Adventure?</h2>
+          <p className="text-lg sm:text-xl mb-8 font-semibold">Join thousands of trekkers who have experienced the magic of the Himalayas</p>
           <Link
             href="/treks"
             className="inline-block bg-white text-teal-600 px-8 py-4 rounded-lg font-bold hover:shadow-2xl transition transform hover:scale-105"
@@ -360,7 +360,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-300 py-12">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="grid md:grid-cols-4 gap-8 mb-8">
+          <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-8 mb-8">
             <div>
               <h4 className="text-white font-black mb-4 text-lg">Himalayan Runners</h4>
               <p className="text-sm text-gray-200">Your gateway to unforgettable mountain adventures.</p>
