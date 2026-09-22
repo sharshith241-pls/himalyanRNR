@@ -66,7 +66,7 @@ export default function RazorpayPaymentButton({
           currency: orderData.currency,
           name: "Himalayan Runners",
           description: `Trek Booking: ${trekTitle}`,
-          image: "/logoo.jpeg",
+          image: "/himalayan_runners_logo.jpeg",
           prefill: {
             name: userName,
             email: userEmail,

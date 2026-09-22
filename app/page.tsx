@@ -148,9 +148,9 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex justify-between items-center">
           <Link href="/" className="flex items-center hover:opacity-80 transition">
             <img 
-              src="/logoo.jpeg" 
+              src="/himalayan_runners_logo.jpeg"
               alt="Himalayan Runners Logo" 
-              className="h-10 sm:h-12 w-auto"
+              className="h-10 sm:h-12 w-auto object-contain"
             />
           </Link>
 
