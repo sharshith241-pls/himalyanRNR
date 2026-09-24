@@ -47,7 +47,7 @@ export function SuccessPageContent() {
 
         // In development: success if we have storedInfo
         // In production: success if payment was marked as paid
-        const isSuccess = status === "paid" && paymentLinkId && paymentId && paymentLinkSignature;
+        const isSuccess = status === "paid" && paymentLinkId && paymentId;
 
         if (!isSuccess) {
           setError("Payment was not completed successfully");

@@ -46,8 +46,13 @@ textarea {
   .site-nav-brand {
     font-size: 0.95rem;
     line-height: 1;
+    transform: translateY(-3px);
   }
 
+
+.site-nav-brand {
+  transform: translateY(-3px);
+}
   .site-nav-links {
     min-width: 0;
     flex: 1 1 auto;

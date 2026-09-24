@@ -31,18 +31,19 @@ export async function POST(request: NextRequest) {
       .createHmac("sha256", keySecret)
       .update(`${paymentLinkId}|${paymentLinkReferenceId || ""}|${paymentLinkStatus}|${paymentId}`)
       .digest("hex");
-    if (
-      typeof paymentLinkSignature !== "string" ||
-      paymentLinkSignature.length !== expectedSignature.length ||
-      !crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(paymentLinkSignature))
-    ) {
-      return NextResponse.json({ success: false, error: "Payment verification failed" }, { status: 400 });
-    }
-
     const razorpay = new Razorpay({ key_id: keyId, key_secret: keySecret });
     const paymentLink = await razorpay.paymentLink.fetch(paymentLinkId) as any;
     if (!paymentLink || paymentLink.status !== "paid") {
       return NextResponse.json({ success: false, error: "Payment could not be confirmed" }, { status: 400 });
+    }
+
+    const matchingPayment = Array.isArray(paymentLink.payments)
+      && paymentLink.payments.some((payment: { payment_id?: string }) => payment.payment_id === paymentId);
+    const validSignature = typeof paymentLinkSignature === "string"
+      && paymentLinkSignature.length === expectedSignature.length
+      && crypto.timingSafeEqual(Buffer.from(expectedSignature), Buffer.from(paymentLinkSignature));
+    if (!matchingPayment && !validSignature) {
+      return NextResponse.json({ success: false, error: "Payment verification failed" }, { status: 400 });
     }
 
     const notes = paymentLink.notes as Record<string, string | number | null>;
