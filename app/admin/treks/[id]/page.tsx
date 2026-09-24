@@ -139,7 +139,7 @@ export default function EditTrekPage() {
           guide_notes: guideContact.guide_notes.trim() || null,
         });
         if (guideError) {
-          throw new Error("Trek details were saved, but guide details could not be saved. Run the trek_guide_contacts migration in docs/COMPLETE_SUPABASE_SETUP.sql, then try again.");
+          throw new Error(`Trek details were saved, but guide details could not be saved: ${guideError.message}`);
         }
       }
 

@@ -482,3 +482,42 @@ UPDATE public.treks
 SET advance_price = ROUND(price * 0.40)
 WHERE COALESCE(advance_price, 0) <= 0
   AND price > 0;
+
+-- ============================================================================
+-- STANDALONE GUIDE CONTACT MIGRATION
+-- Run this block alone when upgrading an existing Supabase project.
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.trek_guide_contacts (
+  trek_id uuid PRIMARY KEY REFERENCES public.treks(id) ON DELETE CASCADE,
+  guide_name text NOT NULL,
+  guide_email text,
+  guide_phone text,
+  guide_notes text,
+  updated_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE public.trek_guide_contacts ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS trek_guide_contacts_select ON public.trek_guide_contacts;
+CREATE POLICY trek_guide_contacts_select ON public.trek_guide_contacts
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.bookings
+      WHERE bookings.trek_id = trek_guide_contacts.trek_id
+        AND bookings.status = 'completed'
+        AND (bookings.user_id = auth.uid() OR bookings.user_email = auth.jwt() ->> 'email')
+    )
+    OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+DROP POLICY IF EXISTS trek_guide_contacts_insert ON public.trek_guide_contacts;
+CREATE POLICY trek_guide_contacts_insert ON public.trek_guide_contacts
+  FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+DROP POLICY IF EXISTS trek_guide_contacts_update ON public.trek_guide_contacts;
+CREATE POLICY trek_guide_contacts_update ON public.trek_guide_contacts
+  FOR UPDATE USING (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
