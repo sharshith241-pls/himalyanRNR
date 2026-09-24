@@ -103,3 +103,26 @@ textarea::placeholder {
 .low-opacity {
   opacity: 1 !important;
 }
+
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  #print-itinerary,
+  #print-itinerary * {
+    visibility: visible !important;
+  }
+
+  #print-itinerary {
+    position: absolute;
+    inset: 0;
+    padding: 2rem;
+    color: #111827;
+    background: white;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+}

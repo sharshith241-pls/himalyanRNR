@@ -7,6 +7,12 @@ import { uploadTrekImage } from "@/utils/supabase/storage";
 import Link from "next/link";
 import Image from "next/image";
 
+interface ItineraryDraft {
+  day: number;
+  title: string;
+  description: string;
+}
+
 export default function NewTrekPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -14,12 +20,16 @@ export default function NewTrekPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [itineraries, setItineraries] = useState<ItineraryDraft[]>([
+    { day: 1, title: "", description: "" },
+  ]);
 
   const [formData, setFormData] = useState({
     title: "",
     location: "",
     description: "",
     price: "",
+    advance_price: "",
     duration: "",
     difficulty: "Easy",
     category: "himalayan-treks",
@@ -29,6 +39,20 @@ export default function NewTrekPage() {
     not_included: "",
     important_info: "",
   });
+
+  const updateItinerary = (index: number, field: keyof ItineraryDraft, value: string) => {
+    setItineraries((current) => current.map((item, itemIndex) => itemIndex === index
+      ? { ...item, [field]: field === "day" ? Number(value) : value }
+      : item));
+  };
+
+  const addItineraryDay = () => {
+    setItineraries((current) => [...current, { day: current.length + 1, title: "", description: "" }]);
+  };
+
+  const removeItineraryDay = (index: number) => {
+    setItineraries((current) => current.filter((_, itemIndex) => itemIndex !== index).map((item, itemIndex) => ({ ...item, day: itemIndex + 1 })));
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({
@@ -116,19 +140,29 @@ export default function NewTrekPage() {
           location: formData.location,
           description: formData.description,
           price: parseFloat(formData.price),
+          advance_price: parseFloat(formData.advance_price) || 0,
           duration: formData.duration,
           difficulty: formData.difficulty,
           category: formData.category,
           image_url: imageUrl,
           guide_id: user.id,
-          itinerary: formData.itinerary,
+          itinerary: "",
           included: formData.included,
           not_included: formData.not_included,
           important_info: formData.important_info,
         },
-      ]);
+      ]).select("id").single();
 
       if (insertError) throw insertError;
+
+      if (data?.id && itineraries.some((item) => item.title.trim() || item.description.trim())) {
+        const { error: itineraryError } = await supabase.from("trek_itinerary").insert(
+          itineraries
+            .filter((item) => item.title.trim() || item.description.trim())
+            .map((item) => ({ ...item, trek_id: data.id }))
+        );
+        if (itineraryError) throw itineraryError;
+      }
 
       router.push("/admin/treks");
       router.refresh();
@@ -215,6 +249,21 @@ text-gray-900
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-2">Advance Payment (₹) *</label>
+              <input
+                type="number"
+                name="advance_price"
+                value={formData.advance_price}
+                onChange={handleChange}
+                min="1"
+                max={formData.price || undefined}
+                placeholder="e.g., 2000"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
+                required
+              />
+            </div>
+
             {/* Duration */}
             <div>
               <label className="block text-sm font-semibold text-gray-800 mb-2">
@@ -289,19 +338,23 @@ text-gray-900
               />
             </div>
 
-              {/* Itinerary */}
               <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">
-                  Itinerary
-                </label>
-                <textarea
-                  name="itinerary"
-                  value={formData.itinerary}
-                  onChange={handleChange}
-                  placeholder="Day 1: ...\nDay 2: ..."
-                  rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none placeholder-gray-500 text-gray-900 placeholder-opacity-100"
-                />
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-semibold text-gray-800">Day-wise Itinerary</label>
+                  <button type="button" onClick={addItineraryDay} className="text-sm font-semibold text-teal-700 hover:text-teal-900">+ Add day</button>
+                </div>
+                <div className="space-y-4">
+                  {itineraries.map((item, index) => (
+                    <div key={index} className="rounded-lg border border-gray-200 p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-semibold text-gray-800">Day {item.day}</span>
+                        {itineraries.length > 1 && <button type="button" onClick={() => removeItineraryDay(index)} className="text-sm text-red-600">Remove</button>}
+                      </div>
+                      <input value={item.title} onChange={(e) => updateItinerary(index, "title", e.target.value)} placeholder="Day title" className="w-full px-4 py-2 mb-3 border border-gray-300 rounded-lg text-gray-900" />
+                      <textarea value={item.description} onChange={(e) => updateItinerary(index, "description", e.target.value)} placeholder="Describe this day's itinerary" rows={3} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* What's Included */}

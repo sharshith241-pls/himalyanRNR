@@ -10,6 +10,9 @@ interface PaymentInfo {
   discountAmount?: number;
   finalAmount?: number;
   couponCode?: string;
+  paymentType?: "advance" | "full";
+  hasFullAccess?: boolean;
+  bookingId?: string;
 }
 
 interface GeneratedCoupon {
@@ -35,14 +38,16 @@ export function SuccessPageContent() {
         const paymentLinkId = searchParams.get("razorpay_payment_link_id");
         const paymentId = searchParams.get("razorpay_payment_id");
         const status = searchParams.get("razorpay_payment_link_status");
+        const paymentLinkReferenceId = searchParams.get("razorpay_payment_link_reference_id");
+        const paymentLinkSignature = searchParams.get("razorpay_payment_link_signature");
 
         // Get payment info from session storage (set before redirect)
         const storedInfo = sessionStorage.getItem("paymentInfo");
-        const paymentInfo = storedInfo ? JSON.parse(storedInfo) : null;
+        const storedPaymentInfo = storedInfo ? JSON.parse(storedInfo) : null;
 
         // In development: success if we have storedInfo
         // In production: success if payment was marked as paid
-        const isSuccess = storedInfo || status === "paid";
+        const isSuccess = status === "paid" && paymentLinkId && paymentId && paymentLinkSignature;
 
         if (!isSuccess) {
           setError("Payment was not completed successfully");
@@ -50,20 +55,48 @@ export function SuccessPageContent() {
           return;
         }
 
-        // Use stored payment info
-        if (paymentInfo) {
-          setPaymentInfo(paymentInfo);
+        const confirmationResponse = await fetch("/api/payment/confirm-link", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            paymentLinkId,
+            paymentId,
+            paymentLinkReferenceId,
+            paymentLinkStatus: status,
+            paymentLinkSignature,
+          }),
+        });
+        const confirmation = await confirmationResponse.json();
+        if (!confirmationResponse.ok || !confirmation.success) {
+          throw new Error(confirmation.error || "Payment verification failed");
+        }
+
+        // Use stored info only after the server has confirmed payment
+        const confirmedPaymentInfo: PaymentInfo = {
+          ...(storedPaymentInfo || {}),
+          trekId: storedPaymentInfo?.trekId || confirmation.booking.trek_id,
+          trekTitle: storedPaymentInfo?.trekTitle || confirmation.booking.trek_title,
+          amount: storedPaymentInfo?.amount || confirmation.booking.amount,
+        };
+
+        if (confirmedPaymentInfo.trekId) {
+          setPaymentInfo({
+            ...confirmedPaymentInfo,
+            paymentType: confirmation.booking.payment_type,
+            hasFullAccess: confirmation.booking.has_full_access,
+            bookingId: confirmation.booking.id,
+          });
 
           // Only generate coupon if this is their first trek booking
-          if (paymentInfo.trekId && (paymentId || "local-payment")) {
+          if (confirmedPaymentInfo.trekId && (paymentId || "local-payment")) {
             try {
               const couponResponse = await fetch("/api/coupon/generate", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                  trekId: paymentInfo.trekId,
+                  trekId: confirmedPaymentInfo.trekId,
                   paymentId: paymentId || "dev-" + Date.now(), // Use payment ID or generate dev ID
-                  amount: paymentInfo.finalAmount || paymentInfo.amount,
+                  amount: confirmedPaymentInfo.finalAmount || confirmedPaymentInfo.amount,
                 }),
               });
 
@@ -142,6 +175,12 @@ export function SuccessPageContent() {
           <div className="text-6xl mb-4">✅</div>
           <h1 className="text-4xl font-bold text-green-600 mb-2">Booking Successful!</h1>
           <p className="text-gray-600 text-lg">Your trek has been confirmed</p>
+          <button
+            onClick={() => router.push("/")}
+            className="mt-5 bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 px-6 rounded-lg transition"
+          >
+            Return to Home
+          </button>
         </div>
 
         {/* Payment Details */}
@@ -182,6 +221,20 @@ export function SuccessPageContent() {
                 </div>
               )}
             </div>
+          </div>
+        )}
+
+        {paymentInfo && (
+          <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-2">Trek Access</h2>
+            <p className="text-green-700 font-semibold">
+              Payment completed. You have {paymentInfo.hasFullAccess ? "full access" : "reserved your place with an advance payment"} for {paymentInfo.trekTitle || "this trek"}.
+            </p>
+            {paymentInfo.trekId && (
+              <button onClick={() => router.push(`/treks/${paymentInfo.trekId}`)} className="mt-4 bg-teal-600 text-white px-5 py-2 rounded-lg font-semibold hover:bg-teal-700">
+                View your trek
+              </button>
+            )}
           </div>
         )}
 

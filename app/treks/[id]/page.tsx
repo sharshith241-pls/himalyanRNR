@@ -14,6 +14,7 @@ interface Trek {
   duration: string;
   difficulty: string;
   price: number;
+  advance_price?: number;
   original_price?: number;
   category: string;
   description?: string;
@@ -27,6 +28,18 @@ interface Trek {
   ending_point?: string;
 }
 
+interface ItineraryItem {
+  id: string;
+  day: number;
+  title: string;
+  description?: string;
+}
+
+interface BookingAccess {
+  payment_type: "advance" | "full";
+  has_full_access: boolean;
+}
+
 const DEMO_TREKS: Record<string, Trek> = {};
 // NOTE: Demo treks removed. Only database treks are displayed.
 
@@ -37,14 +50,31 @@ export default function TrekDetailPage() {
   const [trek, setTrek] = useState<Trek | null>(null);
   const [loading, setLoading] = useState(true);
   const [session, setSession] = useState<any>(null);
+  const [itineraries, setItineraries] = useState<ItineraryItem[]>([]);
+  const [bookingAccess, setBookingAccess] = useState<BookingAccess | null>(null);
   const { isAdmin } = useAdminCheck();
 
   useEffect(() => {
     if (!supabase) return;
+    const client = supabase;
     // Use onAuthStateChange to securely monitor authentication state
     // This listener is automatically verified by Supabase
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+      if (session?.user?.id && trekId) {
+        client
+          .from("bookings")
+          .select("payment_type, has_full_access")
+          .eq("trek_id", trekId)
+          .eq("user_id", session.user.id)
+          .eq("status", "completed")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .maybeSingle()
+          .then(({ data }) => setBookingAccess(data));
+      } else {
+        setBookingAccess(null);
+      }
     });
 
     // Cleanup subscription on unmount
@@ -79,6 +109,12 @@ export default function TrekDetailPage() {
           setTrek(null);
         } else {
           setTrek(data);
+          const { data: itineraryData } = await supabase
+            .from("trek_itinerary")
+            .select("id, day, title, description")
+            .eq("trek_id", trekId)
+            .order("day", { ascending: true });
+          setItineraries(itineraryData || []);
         }
       } catch (err) {
         setTrek(null);
@@ -239,10 +275,18 @@ export default function TrekDetailPage() {
 
             {/* Itinerary */}
             <div>
-              <h2 className="text-3xl md:text-4xl font-black mb-4 text-gray-900">📋 Itinerary</h2>
-              <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-lg border-l-4 border-teal-600 border-2 border-t-0 border-r-0 border-b-0">
-                <p className="text-gray-800 whitespace-pre-line leading-relaxed font-medium text-base">{trek.itinerary}</p>
+              <div id="print-itinerary" className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-lg border-l-4 border-teal-600 border-2 border-t-0 border-r-0 border-b-0">
+                <h2 className="text-3xl md:text-4xl font-black mb-4 text-gray-900">📋 {trek.title} Itinerary</h2>
+                {itineraries.length > 0 ? itineraries.map((item) => (
+                  <article key={item.id} className="mb-5 last:mb-0">
+                    <h3 className="text-lg font-bold text-gray-900">Day {item.day}: {item.title}</h3>
+                    <p className="mt-1 whitespace-pre-line text-gray-800 leading-relaxed">{item.description}</p>
+                  </article>
+                )) : <p className="text-gray-800 whitespace-pre-line leading-relaxed font-medium text-base">{trek.itinerary || "Itinerary will be announced soon."}</p>}
               </div>
+              <button type="button" onClick={() => window.print()} className="no-print mt-4 rounded-lg bg-teal-600 px-5 py-3 font-semibold text-white hover:bg-teal-700">
+                Download itinerary PDF
+              </button>
             </div>
 
             {/* What's Included */}
@@ -318,6 +362,9 @@ export default function TrekDetailPage() {
                     </span>
                   )}
                 </div>
+                {trek.advance_price && trek.advance_price > 0 && trek.advance_price < trek.price && (
+                  <p className="mt-2 text-sm font-semibold text-gray-700">Reserve your place with an advance payment from ₹{trek.advance_price.toLocaleString("en-IN")}</p>
+                )}
                 {trek.original_price && (
                   <p className="text-green-600 font-bold mt-2">
                     Save ₹{(trek.original_price - trek.price).toLocaleString("en-IN")}!
@@ -327,13 +374,20 @@ export default function TrekDetailPage() {
 
               {/* Checkout Button */}
               <div>
+                {bookingAccess && (
+                  <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+                    <strong>Payment completed.</strong> You have {bookingAccess.has_full_access ? "full access" : "an active advance reservation"} for this trek.
+                  </div>
+                )}
                 {session ? (
                   <CheckoutButton
                     trekId={trek.id}
                     trekTitle={trek.title}
                     amount={trek.price}
+                    advanceAmount={trek.advance_price}
                     userEmail={session.user.email}
                     userName={session.user.user_metadata?.name || session.user.email}
+                    userId={session.user.id}
                     onSuccess={() => {
                       alert("Booking successful! Check your email for confirmation.");
                     }}

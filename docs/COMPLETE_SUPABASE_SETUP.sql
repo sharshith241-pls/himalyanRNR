@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS public.treks (
   location text,
   description text,
   price numeric,
+  advance_price numeric NOT NULL DEFAULT 0,
   duration text,
   difficulty text DEFAULT 'Easy',
   category text DEFAULT 'himalayan-treks',
@@ -59,6 +60,10 @@ CREATE TABLE IF NOT EXISTS public.treks (
 
 CREATE INDEX IF NOT EXISTS idx_treks_guide_id ON public.treks(guide_id);
 ALTER TABLE public.treks ENABLE ROW LEVEL SECURITY;
+
+-- Migration for projects created before advance/full payment support.
+ALTER TABLE public.treks
+  ADD COLUMN IF NOT EXISTS advance_price numeric NOT NULL DEFAULT 0;
 
 
 -- ============================================================================
@@ -96,6 +101,9 @@ CREATE TABLE IF NOT EXISTS public.bookings (
   razorpay_signature text,
   status text NOT NULL DEFAULT 'completed' CHECK (status IN ('pending', 'completed', 'failed')),
   amount decimal(10, 2) NOT NULL,
+  payment_type text NOT NULL DEFAULT 'full' CHECK (payment_type IN ('advance', 'full')),
+  full_amount decimal(10, 2),
+  has_full_access boolean NOT NULL DEFAULT false,
   currency text DEFAULT 'INR',
   created_at timestamptz DEFAULT now(),
   updated_at timestamptz DEFAULT now()
@@ -105,7 +113,20 @@ CREATE INDEX IF NOT EXISTS idx_bookings_user_email ON public.bookings(user_email
 CREATE INDEX IF NOT EXISTS idx_bookings_trek_id ON public.bookings(trek_id);
 CREATE INDEX IF NOT EXISTS idx_bookings_status ON public.bookings(status);
 CREATE INDEX IF NOT EXISTS idx_bookings_razorpay_payment_id ON public.bookings(razorpay_payment_id);
+CREATE INDEX IF NOT EXISTS idx_bookings_user_trek ON public.bookings(user_id, trek_id);
 ALTER TABLE public.bookings ENABLE ROW LEVEL SECURITY;
+
+-- Migration for payment choice and trek access tracking.
+ALTER TABLE public.bookings
+  ADD COLUMN IF NOT EXISTS payment_type text NOT NULL DEFAULT 'full';
+ALTER TABLE public.bookings
+  ADD COLUMN IF NOT EXISTS full_amount decimal(10, 2);
+ALTER TABLE public.bookings
+  ADD COLUMN IF NOT EXISTS has_full_access boolean NOT NULL DEFAULT false;
+ALTER TABLE public.bookings
+  DROP CONSTRAINT IF EXISTS bookings_payment_type_check;
+ALTER TABLE public.bookings
+  ADD CONSTRAINT bookings_payment_type_check CHECK (payment_type IN ('advance', 'full'));
 
 
 -- ============================================================================
@@ -417,3 +438,9 @@ CREATE POLICY "Authenticated delete trek-images"
 -- ============================================================================
 -- SETUP COMPLETE
 -- ============================================================================
+
+-- Backfill existing treks so the advance option is available immediately.
+UPDATE public.treks
+SET advance_price = ROUND(price * 0.40)
+WHERE COALESCE(advance_price, 0) <= 0
+  AND price > 0;

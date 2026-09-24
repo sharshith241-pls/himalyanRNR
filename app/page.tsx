@@ -18,6 +18,15 @@ interface Trek {
   description?: string;
 }
 
+interface Booking {
+  id: string;
+  trek_id: string;
+  amount: number;
+  payment_type: "advance" | "full";
+  has_full_access: boolean;
+  trek?: { title: string }[];
+}
+
 const DEMO_TREKS: Trek[] = [];
 // NOTE: Demo treks removed. Only database treks are displayed.
 
@@ -36,14 +45,27 @@ export default function HomePage() {
   const [selectedCategory, setSelectedCategory] = useState("all-treks");
   const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<any>(null);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const { isAdmin } = useAdminCheck();
 
   useEffect(() => {
     if (!supabase) return;
+    const client = supabase;
     // Use onAuthStateChange to securely monitor authentication state
     // This listener is automatically verified by Supabase
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session);
+      if (session?.user?.id) {
+        client
+          .from("bookings")
+          .select("id, trek_id, amount, payment_type, has_full_access, trek:trek_id(title)")
+          .or(`user_id.eq.${session.user.id},user_email.eq.${session.user.email}`)
+          .eq("status", "completed")
+          .order("created_at", { ascending: false })
+          .then(({ data }) => setBookings((data as Booking[]) || []));
+      } else {
+        setBookings([]);
+      }
     });
 
     // Cleanup subscription on unmount
@@ -193,6 +215,26 @@ export default function HomePage() {
           </div>
         </div>
       </nav>
+
+      {session && bookings.length > 0 && (
+        <section className="bg-teal-50 border-b border-teal-100 py-6">
+          <div className="max-w-7xl mx-auto px-4">
+            <h2 className="text-2xl font-black text-gray-900 mb-4">Your Booked Treks</h2>
+            <div className="grid gap-4 md:grid-cols-2">
+              {bookings.map((booking) => (
+                <div key={booking.id} className="bg-white rounded-lg border border-teal-100 p-4 flex items-center justify-between gap-4">
+                  <div>
+                    <p className="font-bold text-gray-900">{booking.trek?.[0]?.title || "Booked trek"}</p>
+                    <p className="text-sm text-gray-600">Paid ₹{Number(booking.amount).toLocaleString("en-IN")} ({booking.payment_type === "full" ? "full payment" : "advance payment"})</p>
+                    <p className="text-sm font-semibold text-green-700">{booking.has_full_access ? "Full access confirmed" : "Advance reservation confirmed"}</p>
+                  </div>
+                  <Link href={`/treks/${booking.trek_id}`} className="shrink-0 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700">View trek</Link>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Hero Section */}
       <section className="relative bg-gradient-to-br from-slate-900 via-teal-900 to-slate-900 text-white py-20 overflow-hidden">

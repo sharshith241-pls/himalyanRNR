@@ -6,6 +6,7 @@ interface CheckoutProps {
   trekId: string;
   trekTitle: string;
   amount: number;
+  advanceAmount?: number;
   userEmail: string;
   userName: string;
   userId?: string;
@@ -17,6 +18,7 @@ export default function CheckoutButton({
   trekId,
   trekTitle,
   amount,
+  advanceAmount,
   userEmail,
   userName,
   userId,
@@ -32,15 +34,20 @@ export default function CheckoutButton({
     finalAmount: number;
     discountPercentage: number;
   } | null>(null);
+  const [paymentType, setPaymentType] = useState<"advance" | "full">("full");
+  const configuredAdvanceAmount = advanceAmount && advanceAmount > 0 && advanceAmount < amount
+    ? advanceAmount
+    : Math.round(amount * 0.4);
+  const selectedAmount = paymentType === "advance" ? configuredAdvanceAmount : amount;
 
   // Validate inputs before payment
   const validateInputs = (): boolean => {
-    if (!trekId || !trekTitle || !amount || !userEmail || !userName) {
+    if (!trekId || !trekTitle || !selectedAmount || !userEmail || !userName) {
       setError("Missing booking information. Please try again.");
       return false;
     }
 
-    if (amount < 1 || amount > 1000000) {
+    if (selectedAmount < 1 || selectedAmount > 1000000) {
       setError("Invalid payment amount. Please try again.");
       return false;
     }
@@ -74,7 +81,9 @@ export default function CheckoutButton({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           couponCode: couponCode.toUpperCase(),
-          amount,
+          amount: selectedAmount,
+          paymentType,
+          fullAmount: amount,
           trekId,
         }),
       });
@@ -117,7 +126,10 @@ export default function CheckoutButton({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           trekId,
-          amount,
+          trekTitle,
+          amount: selectedAmount,
+          paymentType,
+          fullAmount: amount,
           userEmail,
           userName,
           userId,
@@ -142,9 +154,10 @@ export default function CheckoutButton({
         JSON.stringify({
           trekId,
           trekTitle,
-          amount,
+          amount: selectedAmount,
+          paymentType,
           discountAmount: discountInfo?.discountAmount || 0,
-          finalAmount: discountInfo?.finalAmount || amount,
+          finalAmount: discountInfo?.finalAmount || selectedAmount,
           couponCode: couponCode || null,
         })
       );
@@ -168,10 +181,21 @@ export default function CheckoutButton({
     }
   };
 
-  const effectiveAmount = discountInfo?.finalAmount || amount;
+  const effectiveAmount = discountInfo?.finalAmount || selectedAmount;
 
   return (
     <div className="space-y-4">
+      <div className="rounded-lg border border-teal-200 bg-teal-50 p-3">
+        <p className="mb-2 text-sm font-semibold text-gray-800">Choose payment amount</p>
+        <div className="grid grid-cols-2 gap-2 rounded-lg border border-gray-200 bg-white p-1">
+          <button type="button" onClick={() => { setPaymentType("advance"); setDiscountInfo(null); }} className={`rounded-md px-3 py-2 text-sm font-semibold ${paymentType === "advance" ? "bg-teal-600 text-white" : "text-gray-700"}`}>
+            Pay advance ₹{configuredAdvanceAmount.toLocaleString("en-IN")}
+          </button>
+          <button type="button" onClick={() => { setPaymentType("full"); setDiscountInfo(null); }} className={`rounded-md px-3 py-2 text-sm font-semibold ${paymentType === "full" ? "bg-teal-600 text-white" : "text-gray-700"}`}>
+            Pay full ₹{amount.toLocaleString("en-IN")}
+          </button>
+        </div>
+      </div>
       {/* Coupon Section */}
       <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -217,7 +241,7 @@ export default function CheckoutButton({
       {/* Payment Button */}
       <button
         onClick={handleCheckout}
-        disabled={loading || !amount || amount <= 0}
+        disabled={loading || !selectedAmount || selectedAmount <= 0}
         className="w-full bg-gradient-to-r from-teal-500 to-emerald-500 text-white py-3 rounded-lg font-semibold hover:shadow-lg hover:shadow-teal-500/50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
         aria-label={`Pay ₹${effectiveAmount.toLocaleString("en-IN")} for ${trekTitle}`}
       >

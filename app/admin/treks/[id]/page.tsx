@@ -11,6 +11,7 @@ interface Trek {
   location: string;
   description: string;
   price: number;
+  advance_price: number;
   duration: string;
   difficulty: string;
   category: string;
@@ -21,6 +22,13 @@ interface Trek {
   important_info?: string;
 }
 
+interface Itinerary {
+  id?: string;
+  day: number;
+  title: string;
+  description: string;
+}
+
 export default function EditTrekPage() {
   const router = useRouter();
   const params = useParams();
@@ -29,6 +37,7 @@ export default function EditTrekPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [itineraries, setItineraries] = useState<Itinerary[]>([]);
 
   const [formData, setFormData] = useState<Trek>({
     id: "",
@@ -36,6 +45,7 @@ export default function EditTrekPage() {
     location: "",
     description: "",
     price: 0,
+    advance_price: 0,
     duration: "",
     difficulty: "Easy",
     category: "himalayan-treks",
@@ -60,7 +70,14 @@ export default function EditTrekPage() {
         if (fetchError) throw fetchError;
         if (!data) throw new Error("Trek not found");
 
-        setFormData(data);
+        setFormData({ ...data, advance_price: data.advance_price || 0 });
+        const { data: itineraryData, error: itineraryError } = await supabase
+          .from("trek_itinerary")
+          .select("id, day, title, description")
+          .eq("trek_id", trekId)
+          .order("day", { ascending: true });
+        if (itineraryError) throw itineraryError;
+        setItineraries(itineraryData || [{ day: 1, title: "", description: "" }]);
         setLoading(false);
       } catch (err: any) {
         setError(err.message || "Failed to fetch trek");
@@ -89,9 +106,20 @@ export default function EditTrekPage() {
         return;
       }
 
-      const { error: updateError } = await supabase.from("treks").update(formData).eq("id", trekId);
+      const { id, ...trekFields } = formData;
+      const { error: updateError } = await supabase.from("treks").update({ ...trekFields, itinerary: "" }).eq("id", trekId);
 
       if (updateError) throw updateError;
+
+      const { error: deleteItinerariesError } = await supabase.from("trek_itinerary").delete().eq("trek_id", trekId);
+      if (deleteItinerariesError) throw deleteItinerariesError;
+      const itineraryRows = itineraries
+        .filter((item) => item.title.trim() || item.description.trim())
+        .map((item, index) => ({ trek_id: trekId, day: index + 1, title: item.title, description: item.description }));
+      if (itineraryRows.length) {
+        const { error: insertItinerariesError } = await supabase.from("trek_itinerary").insert(itineraryRows);
+        if (insertItinerariesError) throw insertItinerariesError;
+      }
 
       router.push("/admin/treks");
       router.refresh();
@@ -174,6 +202,11 @@ export default function EditTrekPage() {
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-semibold text-gray-800 mb-2">Advance Payment (₹)</label>
+              <input type="number" name="advance_price" value={formData.advance_price} min="1" max={formData.price || undefined} onChange={handleChange} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900" required />
+            </div>
+
             {/* Duration */}
             <div>
               <label className="block text-sm font-semibold text-gray-800 mb-2">Duration</label>
@@ -230,16 +263,23 @@ export default function EditTrekPage() {
               />
             </div>
 
-              {/* Itinerary */}
               <div>
-                <label className="block text-sm font-semibold text-gray-800 mb-2">Itinerary</label>
-                <textarea
-                  name="itinerary"
-                  value={formData.itinerary || ""}
-                  onChange={handleChange}
-                  rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
-                />
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-semibold text-gray-800">Day-wise Itinerary</label>
+                  <button type="button" onClick={() => setItineraries([...itineraries, { day: itineraries.length + 1, title: "", description: "" }])} className="text-sm font-semibold text-teal-700">+ Add day</button>
+                </div>
+                <div className="space-y-4">
+                  {itineraries.map((item, index) => (
+                    <div key={item.id || index} className="rounded-lg border border-gray-200 p-4">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="font-semibold text-gray-800">Day {index + 1}</span>
+                        {itineraries.length > 1 && <button type="button" onClick={() => setItineraries(itineraries.filter((_, itemIndex) => itemIndex !== index))} className="text-sm text-red-600">Remove</button>}
+                      </div>
+                      <input value={item.title} onChange={(e) => setItineraries(itineraries.map((current, itemIndex) => itemIndex === index ? { ...current, title: e.target.value } : current))} placeholder="Day title" className="w-full px-4 py-2 mb-3 border border-gray-300 rounded-lg text-gray-900" />
+                      <textarea value={item.description || ""} onChange={(e) => setItineraries(itineraries.map((current, itemIndex) => itemIndex === index ? { ...current, description: e.target.value } : current))} placeholder="Describe this day's itinerary" rows={3} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* What's Included */}

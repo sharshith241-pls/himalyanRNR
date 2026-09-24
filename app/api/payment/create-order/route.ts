@@ -4,26 +4,8 @@ import { createClient } from "@/utils/supabase/server";
 
 const createRazorpayInstance = () => {
   // Accept multiple possible env var names (some setups use NEXT_PUBLIC prefix, some don't)
-  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET || process.env.NEXT_PUBLIC_RAZORPAY_KEY_SECRET;
-
-  // Log detailed info for debugging
-  console.log("=== RAZORPAY ENV DEBUG ===");
-  console.log("Raw NEXT_PUBLIC_RAZORPAY_KEY_ID:", JSON.stringify(process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID));
-  console.log("Raw RAZORPAY_KEY_ID:", JSON.stringify(process.env.RAZORPAY_KEY_ID));
-  console.log("Raw RAZORPAY_KEY_SECRET (first 10 chars):", JSON.stringify(process.env.RAZORPAY_KEY_SECRET?.substring(0, 10)));
-  console.log("Raw NEXT_PUBLIC_RAZORPAY_KEY_SECRET (first 10 chars):", JSON.stringify(process.env.NEXT_PUBLIC_RAZORPAY_KEY_SECRET?.substring(0, 10)));
-  
-  console.log("Resolved keyId:", JSON.stringify(keyId));
-  console.log("Resolved keySecret (first 10 chars):", JSON.stringify(keySecret?.substring(0, 10)));
-  
-  console.log("Environment check (create-order):", {
-    hasKeyId: !!keyId,
-    keyIdLength: keyId?.length || 0,
-    keyIdPrefix: keyId?.substring(0, 8) || "none",
-    hasKeySecret: !!keySecret,
-    keySecretLength: keySecret?.length || 0,
-  });
+  const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
   if (!keyId || !keySecret) {
     console.error("Missing Razorpay credentials (create-order):", {
@@ -99,10 +81,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { trekId, amount, userEmail, userName, couponCode, userId } = body;
+    const { trekId, trekTitle, amount, userEmail, userName, couponCode, userId, paymentType = "full", fullAmount = amount } = body;
 
     // Validate all required fields
-    if (!trekId || !amount || !userEmail || !userName) {
+    if (!trekId || !trekTitle || !amount || !userEmail || !userName) {
       return NextResponse.json(
         { error: "Missing required fields: trekId, amount, userEmail, userName" },
         { status: 400, headers }
@@ -115,6 +97,10 @@ export async function POST(request: NextRequest) {
         { error: "Invalid trek ID format" },
         { status: 400, headers }
       );
+    }
+
+    if (paymentType !== "advance" && paymentType !== "full") {
+      return NextResponse.json({ error: "Invalid payment type" }, { status: 400, headers });
     }
 
     // Validate amount
@@ -141,6 +127,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const supabase = await createClient();
+    const { data: trek, error: trekError } = await supabase.from("treks").select("price, advance_price").eq("id", trekId).single();
+    if (trekError || !trek) {
+      return NextResponse.json({ error: "Trek not found" }, { status: 404, headers });
+    }
+    const configuredAdvanceAmount = Number(trek.advance_price) > 0 && Number(trek.advance_price) < Number(trek.price)
+      ? Number(trek.advance_price)
+      : Math.round(Number(trek.price) * 0.4);
+    const expectedAmount = paymentType === "advance" ? configuredAdvanceAmount : Number(trek.price);
+    if (!Number.isFinite(expectedAmount) || Math.round(expectedAmount * 100) !== Math.round(Number(amount) * 100)) {
+      return NextResponse.json({ error: "Payment amount does not match the trek pricing" }, { status: 400, headers });
+    }
+
     // Initialize coupon discount tracking
     let finalAmount = amount;
     let discountAmount = 0;
@@ -149,8 +148,6 @@ export async function POST(request: NextRequest) {
 
     // Handle coupon code if provided
     if (couponCode) {
-      const supabase = await createClient();
-
       // Fetch and validate coupon
       const { data: coupon, error: couponError } = await supabase
         .from("coupon_codes")
@@ -208,11 +205,10 @@ export async function POST(request: NextRequest) {
 
     // Create Razorpay Payment Link (Hosted Checkout)
     try {
-      // Get the actual deployed domain from environment variable
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL;
-      
-      // Log environment variable for debugging
-      console.log("Environment check - NEXT_PUBLIC_APP_URL:", appUrl);
+      // Prefer the configured public URL, with the request origin as a local fallback.
+      const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+      const requestOrigin = request.headers.get("origin")?.replace(/\/$/, "");
+      const appUrl = configuredAppUrl || requestOrigin;
       
       // Build payment link configuration
       const paymentLinkConfig: any = {
@@ -229,10 +225,13 @@ export async function POST(request: NextRequest) {
         },
         notes: {
           trekId,
+          trekTitle,
           userEmail,
           userName,
           originalAmount: amount,
           finalAmount: finalAmount,
+          paymentType,
+          fullAmount: Number(trek.price),
           discountAmount: discountAmount,
           discountPercentage: couponDiscountPercentage,
           couponCode: couponCode || null,
@@ -241,16 +240,10 @@ export async function POST(request: NextRequest) {
         callback_method: "get",
       };
 
-      // IMPORTANT: Only add callback_url if we have a valid production domain
-      // DO NOT fallback to localhost - that breaks production!
-      if (appUrl && !appUrl.includes("localhost") && !appUrl.includes("127.0.0.1")) {
+      if (appUrl && /^https:\/\//i.test(appUrl)) {
         paymentLinkConfig.callback_url = `${appUrl}/success`;
-        console.log("✅ Production mode - callback_url set to:", paymentLinkConfig.callback_url);
       } else {
-        console.warn("⚠️ WARNING: NEXT_PUBLIC_APP_URL is not set or is localhost. Callback URL will not be included.");
-        if (!appUrl) {
-          console.error("❌ ERROR: NEXT_PUBLIC_APP_URL environment variable is missing! Set it in your deployment platform.");
-        }
+        console.error("Payment callback URL is not configured. Set NEXT_PUBLIC_APP_URL to the deployed HTTPS URL.");
       }
 
       const paymentLink = await razorpayInstance.paymentLink.create(paymentLinkConfig);

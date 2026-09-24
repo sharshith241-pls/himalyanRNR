@@ -5,21 +5,10 @@ import { createClient } from "@/utils/supabase/server";
 
 const createRazorpayInstance = () => {
   // Accept multiple possible env var names (some setups use NEXT_PUBLIC prefix, some don't)
-  const keyId = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || process.env.RAZORPAY_KEY_ID;
-  const keySecret = process.env.RAZORPAY_KEY_SECRET || process.env.NEXT_PUBLIC_RAZORPAY_KEY_SECRET;
-
-  console.log("Verify endpoint - Environment check:", {
-    hasKeyId: !!keyId,
-    keyIdLength: keyId?.length || 0,
-    hasKeySecret: !!keySecret,
-    keySecretLength: keySecret?.length || 0,
-  });
+  const keyId = process.env.RAZORPAY_KEY_ID || process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
   if (!keyId || !keySecret) {
-    console.error("Missing Razorpay credentials (verify):", {
-      hasKeyId: !!keyId,
-      hasKeySecret: !!keySecret,
-    });
     return null;
   }
 
@@ -127,7 +116,7 @@ export async function POST(request: NextRequest) {
     const digest = shasum.digest("hex");
 
     // Signature verification
-    if (digest !== razorpaySignature) {
+    if (digest.length !== razorpaySignature.length || !crypto.timingSafeEqual(Buffer.from(digest), Buffer.from(razorpaySignature))) {
       console.warn(`Signature mismatch for order: ${orderId}`);
       return NextResponse.json(
         { error: "Payment verification failed", success: false },
