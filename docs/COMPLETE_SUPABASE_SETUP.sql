@@ -164,6 +164,14 @@ DROP POLICY IF EXISTS trek_guide_contacts_update ON public.trek_guide_contacts;
 CREATE POLICY trek_guide_contacts_update ON public.trek_guide_contacts
   FOR UPDATE USING (
     EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  ) WITH CHECK (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
+DROP POLICY IF EXISTS trek_guide_contacts_delete ON public.trek_guide_contacts;
+CREATE POLICY trek_guide_contacts_delete ON public.trek_guide_contacts
+  FOR DELETE USING (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
   );
 
 
