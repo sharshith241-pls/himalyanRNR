@@ -40,6 +40,13 @@ interface BookingAccess {
   has_full_access: boolean;
 }
 
+interface GuideContact {
+  guide_name: string;
+  guide_email?: string | null;
+  guide_phone?: string | null;
+  guide_notes?: string | null;
+}
+
 const DEMO_TREKS: Record<string, Trek> = {};
 // NOTE: Demo treks removed. Only database treks are displayed.
 
@@ -52,6 +59,7 @@ export default function TrekDetailPage() {
   const [session, setSession] = useState<any>(null);
   const [itineraries, setItineraries] = useState<ItineraryItem[]>([]);
   const [bookingAccess, setBookingAccess] = useState<BookingAccess | null>(null);
+  const [guideContact, setGuideContact] = useState<GuideContact | null>(null);
   const { isAdmin } = useAdminCheck();
 
   useEffect(() => {
@@ -66,14 +74,25 @@ export default function TrekDetailPage() {
           .from("bookings")
           .select("payment_type, has_full_access")
           .eq("trek_id", trekId)
-          .eq("user_id", session.user.id)
+          .or(`user_id.eq.${session.user.id},user_email.eq.${session.user.email}`)
           .eq("status", "completed")
           .order("created_at", { ascending: false })
           .limit(1)
           .maybeSingle()
-          .then(({ data }) => setBookingAccess(data));
+          .then(async ({ data }) => {
+            setBookingAccess(data);
+            if (data) {
+              const { data: contact } = await client
+                .from("trek_guide_contacts")
+                .select("guide_name, guide_email, guide_phone, guide_notes")
+                .eq("trek_id", trekId)
+                .maybeSingle();
+              setGuideContact(contact);
+            }
+          });
       } else {
         setBookingAccess(null);
+        setGuideContact(null);
       }
     });
 
@@ -375,11 +394,20 @@ export default function TrekDetailPage() {
               {/* Checkout Button */}
               <div>
                 {bookingAccess && (
-                  <div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
-                    <strong>Payment completed.</strong> You have {bookingAccess.has_full_access ? "full access" : "an active advance reservation"} for this trek.
+                  <div className="mb-4 space-y-4 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
+                    <p><strong>Payment completed.</strong> You have {bookingAccess.has_full_access ? "full access" : "an active advance reservation"} for this trek.</p>
+                    {guideContact && (
+                      <div className="rounded-lg border border-green-200 bg-white p-4 text-gray-800">
+                        <h3 className="mb-2 text-lg font-bold">Your Trek Guide</h3>
+                        <p><strong>Name:</strong> {guideContact.guide_name}</p>
+                        {guideContact.guide_email && <p><strong>Email:</strong> {guideContact.guide_email}</p>}
+                        {guideContact.guide_phone && <p><strong>Phone:</strong> {guideContact.guide_phone}</p>}
+                        {guideContact.guide_notes && <p className="mt-2"><strong>Notes:</strong> {guideContact.guide_notes}</p>}
+                      </div>
+                    )}
                   </div>
                 )}
-                {session ? (
+                {session && !bookingAccess ? (
                   <CheckoutButton
                     trekId={trek.id}
                     trekTitle={trek.title}

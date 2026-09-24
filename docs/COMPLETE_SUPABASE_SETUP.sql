@@ -65,6 +65,39 @@ ALTER TABLE public.treks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.treks
   ADD COLUMN IF NOT EXISTS advance_price numeric NOT NULL DEFAULT 0;
 
+-- Guide contact details are kept separate so they are not exposed by the
+-- public trek listing. They are readable only by users with a completed booking.
+CREATE TABLE IF NOT EXISTS public.trek_guide_contacts (
+  trek_id uuid PRIMARY KEY REFERENCES public.treks(id) ON DELETE CASCADE,
+  guide_name text NOT NULL,
+  guide_email text,
+  guide_phone text,
+  guide_notes text,
+  updated_at timestamptz DEFAULT now()
+);
+ALTER TABLE public.trek_guide_contacts ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS trek_guide_contacts_select ON public.trek_guide_contacts;
+CREATE POLICY trek_guide_contacts_select ON public.trek_guide_contacts
+  FOR SELECT USING (
+    EXISTS (
+      SELECT 1 FROM public.bookings
+      WHERE bookings.trek_id = trek_guide_contacts.trek_id
+        AND bookings.status = 'completed'
+        AND (bookings.user_id = auth.uid() OR bookings.user_email = auth.jwt() ->> 'email')
+    )
+    OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+DROP POLICY IF EXISTS trek_guide_contacts_insert ON public.trek_guide_contacts;
+CREATE POLICY trek_guide_contacts_insert ON public.trek_guide_contacts
+  FOR INSERT WITH CHECK (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+DROP POLICY IF EXISTS trek_guide_contacts_update ON public.trek_guide_contacts;
+CREATE POLICY trek_guide_contacts_update ON public.trek_guide_contacts
+  FOR UPDATE USING (
+    EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+  );
+
 
 -- ============================================================================
 -- 4) TREK ITINERARY TABLE

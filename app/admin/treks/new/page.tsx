@@ -30,6 +30,10 @@ export default function NewTrekPage() {
     description: "",
     price: "",
     advance_price: "",
+    guide_name: "",
+    guide_email: "",
+    guide_phone: "",
+    guide_notes: "",
     duration: "",
     difficulty: "Easy",
     category: "himalayan-treks",
@@ -164,6 +168,17 @@ export default function NewTrekPage() {
         if (itineraryError) throw itineraryError;
       }
 
+      if (data?.id && formData.guide_name.trim()) {
+        const { error: guideError } = await supabase.from("trek_guide_contacts").upsert({
+          trek_id: data.id,
+          guide_name: formData.guide_name.trim(),
+          guide_email: formData.guide_email.trim() || null,
+          guide_phone: formData.guide_phone.trim() || null,
+          guide_notes: formData.guide_notes.trim() || null,
+        });
+        if (guideError) throw guideError;
+      }
+
       router.push("/admin/treks");
       router.refresh();
     } catch (err: any) {
@@ -262,6 +277,14 @@ text-gray-900
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900"
                 required
               />
+            </div>
+
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-3">
+              <h3 className="font-bold text-gray-900">Guide Contact (shown only after booking)</h3>
+              <input name="guide_name" value={formData.guide_name} onChange={handleChange} placeholder="Guide name" className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" required />
+              <input type="email" name="guide_email" value={formData.guide_email} onChange={handleChange} placeholder="Guide email" className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
+              <input name="guide_phone" value={formData.guide_phone} onChange={handleChange} placeholder="Guide phone" className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
+              <textarea name="guide_notes" value={formData.guide_notes} onChange={handleChange} placeholder="Meeting instructions or other guide notes" rows={2} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
             </div>
 
             {/* Duration */}

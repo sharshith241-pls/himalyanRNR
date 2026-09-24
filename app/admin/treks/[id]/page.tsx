@@ -29,6 +29,13 @@ interface Itinerary {
   description: string;
 }
 
+interface GuideContact {
+  guide_name: string;
+  guide_email: string;
+  guide_phone: string;
+  guide_notes: string;
+}
+
 export default function EditTrekPage() {
   const router = useRouter();
   const params = useParams();
@@ -38,6 +45,7 @@ export default function EditTrekPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
+  const [guideContact, setGuideContact] = useState<GuideContact>({ guide_name: "", guide_email: "", guide_phone: "", guide_notes: "" });
 
   const [formData, setFormData] = useState<Trek>({
     id: "",
@@ -78,6 +86,8 @@ export default function EditTrekPage() {
           .order("day", { ascending: true });
         if (itineraryError) throw itineraryError;
         setItineraries(itineraryData || [{ day: 1, title: "", description: "" }]);
+        const { data: guideData } = await supabase.from("trek_guide_contacts").select("guide_name, guide_email, guide_phone, guide_notes").eq("trek_id", trekId).maybeSingle();
+        if (guideData) setGuideContact(guideData);
         setLoading(false);
       } catch (err: any) {
         setError(err.message || "Failed to fetch trek");
@@ -119,6 +129,16 @@ export default function EditTrekPage() {
       if (itineraryRows.length) {
         const { error: insertItinerariesError } = await supabase.from("trek_itinerary").insert(itineraryRows);
         if (insertItinerariesError) throw insertItinerariesError;
+      }
+      if (guideContact.guide_name.trim()) {
+        const { error: guideError } = await supabase.from("trek_guide_contacts").upsert({
+          trek_id: trekId,
+          ...guideContact,
+          guide_email: guideContact.guide_email.trim() || null,
+          guide_phone: guideContact.guide_phone.trim() || null,
+          guide_notes: guideContact.guide_notes.trim() || null,
+        });
+        if (guideError) throw guideError;
       }
 
       router.push("/admin/treks");
@@ -205,6 +225,14 @@ export default function EditTrekPage() {
             <div>
               <label className="block text-sm font-semibold text-gray-800 mb-2">Advance Payment (₹)</label>
               <input type="number" name="advance_price" value={formData.advance_price} min="1" max={formData.price || undefined} onChange={handleChange} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-teal-500 focus:outline-none text-gray-900" required />
+            </div>
+
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-3">
+              <h3 className="font-bold text-gray-900">Guide Contact (shown only after booking)</h3>
+              <input value={guideContact.guide_name} onChange={(e) => setGuideContact({ ...guideContact, guide_name: e.target.value })} placeholder="Guide name" className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" required />
+              <input type="email" value={guideContact.guide_email} onChange={(e) => setGuideContact({ ...guideContact, guide_email: e.target.value })} placeholder="Guide email" className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
+              <input value={guideContact.guide_phone} onChange={(e) => setGuideContact({ ...guideContact, guide_phone: e.target.value })} placeholder="Guide phone" className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
+              <textarea value={guideContact.guide_notes} onChange={(e) => setGuideContact({ ...guideContact, guide_notes: e.target.value })} placeholder="Meeting instructions or other guide notes" rows={2} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
             </div>
 
             {/* Duration */}
