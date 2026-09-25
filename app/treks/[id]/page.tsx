@@ -6,6 +6,7 @@ import { supabase } from "@/utils/supabase/client";
 import Link from "next/link";
 import CheckoutButton from "@/components/CheckoutButton";
 import { useAdminCheck } from "@/hooks/useAdminCheck";
+import { jsPDF } from "jspdf";
 
 interface Trek {
   id: string;
@@ -36,6 +37,12 @@ interface ItineraryItem {
 }
 
 interface BookingAccess {
+  id: string;
+  user_name: string;
+  user_email: string;
+  amount: number;
+  slot_date?: string | null;
+  razorpay_payment_id?: string | null;
   payment_type: "advance" | "full";
   has_full_access: boolean;
 }
@@ -81,7 +88,7 @@ export default function TrekDetailPage() {
       if (currentSession?.user?.id && trekId) {
         const { data } = await client
           .from("bookings")
-          .select("payment_type, has_full_access")
+          .select("id, user_name, user_email, amount, slot_date, razorpay_payment_id, payment_type, has_full_access")
           .eq("trek_id", trekId)
           .or(`user_id.eq.${currentSession.user.id},user_email.eq.${currentSession.user.email}`)
           .eq("status", "completed")
@@ -189,6 +196,77 @@ export default function TrekDetailPage() {
     }
     
     window.location.href = '/';
+  };
+
+  const downloadBookingConfirmation = () => {
+    if (!trek || !bookingAccess) return;
+
+    const pdf = new jsPDF();
+    const margin = 18;
+    const width = pdf.internal.pageSize.getWidth();
+    let y = 22;
+    const addSection = (heading: string, rows: string[]) => {
+      pdf.setTextColor(0, 105, 92);
+      pdf.setFontSize(12);
+      pdf.setFont("helvetica", "bold");
+      pdf.text(heading, margin, y);
+      y += 7;
+      pdf.setTextColor(31, 41, 55);
+      pdf.setFontSize(10);
+      pdf.setFont("helvetica", "normal");
+      rows.forEach((row) => {
+        const wrapped = pdf.splitTextToSize(row, width - margin * 2);
+        pdf.text(wrapped, margin, y);
+        y += wrapped.length * 5 + 2;
+      });
+      y += 4;
+    };
+
+    pdf.setFillColor(0, 137, 123);
+    pdf.rect(0, 0, width, 12, "F");
+    pdf.setTextColor(17, 24, 39);
+    pdf.setFontSize(20);
+    pdf.setFont("helvetica", "bold");
+    pdf.text("Himalayan Runners", margin, y);
+    y += 10;
+    pdf.setFontSize(16);
+    pdf.text("Trek Booking Confirmation", margin, y);
+    y += 12;
+
+    addSection("User Details", [
+      `Name: ${bookingAccess.user_name}`,
+      `Email: ${bookingAccess.user_email}`,
+    ]);
+    addSection("Trek Information", [
+      `Trek: ${trek.title}`,
+      `Duration: ${trek.duration || "-"}`,
+      `Difficulty: ${trek.difficulty || "-"}`,
+      `Location: ${trek.location || "-"}`,
+      `Selected slot: ${bookingAccess.slot_date ? new Date(`${bookingAccess.slot_date}T00:00:00`).toLocaleDateString("en-IN", { dateStyle: "long" }) : "-"}`,
+    ]);
+    addSection("Payment Information", [
+      `Booking ID: ${bookingAccess.id}`,
+      `Payment ID: ${bookingAccess.razorpay_payment_id || "-"}`,
+      `Payment type: ${bookingAccess.payment_type === "full" ? "Full payment" : "Advance payment"}`,
+      `Amount paid: INR ${Number(bookingAccess.amount).toLocaleString("en-IN")}`,
+    ]);
+    if (guideContact) {
+      addSection("Contact Person", [
+        `Name: ${guideContact.guide_name}`,
+        `Email: ${guideContact.guide_email || "-"}`,
+        `Phone: ${guideContact.guide_phone || "-"}`,
+        `Important information: ${guideContact.guide_notes || "-"}`,
+      ]);
+    }
+
+    const blobUrl = URL.createObjectURL(pdf.output("blob"));
+    const link = window.document.createElement("a");
+    link.href = blobUrl;
+    link.download = `himalayan-runners-${bookingAccess.id}.pdf`;
+    window.document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
   };
 
   if (loading) {
@@ -448,6 +526,9 @@ export default function TrekDetailPage() {
                         {guideContact.guide_notes && <p className="mt-2 whitespace-pre-line"><strong>Important Information:</strong> {guideContact.guide_notes}</p>}
                       </div>
                     )}
+                    <button type="button" onClick={downloadBookingConfirmation} className="w-full rounded-lg bg-teal-700 px-4 py-3 font-semibold text-white hover:bg-teal-800">
+                      Download Confirmation PDF
+                    </button>
                   </div>
                 )}
                 {!bookingAccessLoading && session && !bookingAccess ? (
