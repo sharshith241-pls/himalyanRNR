@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { supabase } from "@/utils/supabase/client";
+import { jsPDF } from "jspdf";
 
 interface PaymentInfo {
   trekId?: string;
@@ -15,6 +16,9 @@ interface PaymentInfo {
   hasFullAccess?: boolean;
   bookingId?: string;
   slotDate?: string;
+  userName?: string;
+  userEmail?: string;
+  paymentId?: string;
 }
 
 interface BookedTrek {
@@ -94,6 +98,9 @@ export function SuccessPageContent() {
           trekId: storedPaymentInfo?.trekId || confirmation.booking.trek_id,
           trekTitle: storedPaymentInfo?.trekTitle || confirmation.booking.trek_title,
           amount: storedPaymentInfo?.amount || confirmation.booking.amount,
+          userName: storedPaymentInfo?.userName || confirmation.booking.user_name,
+          userEmail: storedPaymentInfo?.userEmail || confirmation.booking.user_email,
+          paymentId: confirmation.booking.razorpay_payment_id || paymentId,
         };
 
         if (confirmedPaymentInfo.trekId) {
@@ -161,6 +168,74 @@ export function SuccessPageContent() {
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+  };
+
+  const downloadConfirmationPdf = () => {
+    if (!paymentInfo) return;
+
+    const document = new jsPDF();
+    const pageWidth = document.internal.pageSize.getWidth();
+    const margin = 18;
+    let y = 22;
+
+    document.setFillColor(0, 137, 123);
+    document.rect(0, 0, pageWidth, 12, "F");
+    document.setTextColor(17, 24, 39);
+    document.setFontSize(20);
+    document.setFont("helvetica", "bold");
+    document.text("Himalayan Runners", margin, y);
+    y += 10;
+    document.setFontSize(16);
+    document.text("Trek Booking Confirmation", margin, y);
+    y += 12;
+
+    const addSection = (heading: string, rows: string[]) => {
+      document.setTextColor(0, 105, 92);
+      document.setFontSize(12);
+      document.setFont("helvetica", "bold");
+      document.text(heading, margin, y);
+      y += 7;
+      document.setTextColor(31, 41, 55);
+      document.setFontSize(10);
+      document.setFont("helvetica", "normal");
+      rows.forEach((row) => {
+        const wrapped = document.splitTextToSize(row, pageWidth - margin * 2);
+        document.text(wrapped, margin, y);
+        y += wrapped.length * 5 + 2;
+      });
+      y += 4;
+    };
+
+    addSection("User Details", [
+      `Name: ${paymentInfo.userName || "-"}`,
+      `Email: ${paymentInfo.userEmail || "-"}`,
+    ]);
+    addSection("Trek Information", [
+      `Trek: ${paymentInfo.trekTitle || "Trek"}`,
+      `Duration: ${bookedTrek?.duration || "-"}`,
+      `Difficulty: ${bookedTrek?.difficulty || "-"}`,
+      `Location: ${bookedTrek?.location || "-"}`,
+      `Selected slot: ${paymentInfo.slotDate ? new Date(`${paymentInfo.slotDate}T00:00:00`).toLocaleDateString("en-IN", { dateStyle: "long" }) : "-"}`,
+    ]);
+    addSection("Payment Information", [
+      `Booking ID: ${paymentInfo.bookingId || "-"}`,
+      `Payment ID: ${paymentInfo.paymentId || "-"}`,
+      `Payment type: ${paymentInfo.paymentType === "full" ? "Full payment" : "Advance payment"}`,
+      `Amount paid: INR ${(paymentInfo.finalAmount ?? paymentInfo.amount ?? 0).toLocaleString("en-IN")}`,
+    ]);
+    if (contactPerson) {
+      addSection("Contact Person", [
+        `Name: ${contactPerson.guide_name}`,
+        `Email: ${contactPerson.guide_email || "-"}`,
+        `Phone: ${contactPerson.guide_phone || "-"}`,
+        `Important information: ${contactPerson.guide_notes || "-"}`,
+      ]);
+    }
+
+    document.setFontSize(9);
+    document.setTextColor(107, 114, 128);
+    document.text("Keep this confirmation ticket for your trek.", margin, Math.min(y + 5, 280));
+    document.save(`himalayan-runners-${paymentInfo.bookingId || "booking"}.pdf`);
   };
 
   if (loading) {
@@ -270,7 +345,7 @@ export function SuccessPageContent() {
                 </div>
               )}
             </div>
-            <button type="button" onClick={() => window.print()} className="no-print mt-5 w-full rounded-lg bg-teal-600 py-3 font-semibold text-white hover:bg-teal-700">Download confirmation PDF</button>
+            <button type="button" onClick={downloadConfirmationPdf} className="no-print mt-5 w-full rounded-lg bg-teal-600 py-3 font-semibold text-white hover:bg-teal-700">Download confirmation PDF</button>
           </div>
         )}
 

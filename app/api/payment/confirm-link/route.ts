@@ -72,7 +72,7 @@ export async function POST(request: NextRequest) {
         currency: paymentLink.currency || "INR",
         updated_at: new Date().toISOString(),
       }, { onConflict: "razorpay_payment_id" })
-      .select("id, trek_id, amount, payment_type, has_full_access, slot_date")
+      .select("id, trek_id, amount, payment_type, has_full_access, slot_date, user_name, user_email, razorpay_payment_id")
       .single();
 
     if (error) {

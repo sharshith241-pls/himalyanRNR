@@ -297,10 +297,10 @@ export default function TrekDetailPage() {
                 { icon: "📈", label: "Difficulty", value: trek.difficulty },
                 { icon: "📍", label: "Location", value: trek.location },
               ].map((stat, i) => (
-                <div key={i} className="bg-gradient-to-br from-teal-50 to-blue-50 p-4 rounded-lg border-2 border-teal-200">
-                  <div className="text-[1.75rem] mb-2">{stat.icon}</div>
-                  <p className="text-xs font-black text-gray-900 mb-1">{stat.label}</p>
-                  <p className="font-black text-base text-teal-700">{stat.value}</p>
+                <div key={i} className="min-w-0 bg-gradient-to-br from-teal-50 to-blue-50 p-3 rounded-lg border-2 border-teal-200">
+                  <div className="text-[1.5rem] mb-1">{stat.icon}</div>
+                  <p className="text-[0.7rem] font-black text-gray-900 mb-1">{stat.label}</p>
+                  <p className="break-words font-black text-sm text-teal-700">{stat.value}</p>
                 </div>
               ))}
             </div>

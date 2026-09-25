@@ -174,6 +174,8 @@ export default function CheckoutButton({
           couponCode: couponCode || null,
           slotId: slotId || null,
           slotDate: slotDate || null,
+          userName,
+          userEmail,
         })
       );
 
