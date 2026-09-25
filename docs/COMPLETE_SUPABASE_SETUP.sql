@@ -172,6 +172,8 @@ CREATE POLICY trek_availability_delete ON public.trek_availability_slots FOR DEL
 CREATE OR REPLACE FUNCTION public.reserve_trek_availability_slot()
 RETURNS trigger
 LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
   IF NEW.slot_id IS NOT NULL THEN

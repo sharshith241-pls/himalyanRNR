@@ -66,6 +66,7 @@ export default function TrekDetailPage() {
   const [session, setSession] = useState<any>(null);
   const [itineraries, setItineraries] = useState<ItineraryItem[]>([]);
   const [bookingAccess, setBookingAccess] = useState<BookingAccess | null>(null);
+  const [bookingAccessLoading, setBookingAccessLoading] = useState(true);
   const [guideContact, setGuideContact] = useState<GuideContact | null>(null);
   const [availabilitySlots, setAvailabilitySlots] = useState<AvailabilitySlot[]>([]);
   const [selectedSlotId, setSelectedSlotId] = useState("");
@@ -74,36 +75,39 @@ export default function TrekDetailPage() {
   useEffect(() => {
     if (!supabase) return;
     const client = supabase;
-    // Use onAuthStateChange to securely monitor authentication state
-    // This listener is automatically verified by Supabase
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setSession(session);
-      if (session?.user?.id && trekId) {
-        client
+    const loadBookingAccess = async (currentSession: any) => {
+      setBookingAccessLoading(true);
+      setSession(currentSession);
+      if (currentSession?.user?.id && trekId) {
+        const { data } = await client
           .from("bookings")
           .select("payment_type, has_full_access")
           .eq("trek_id", trekId)
-          .or(`user_id.eq.${session.user.id},user_email.eq.${session.user.email}`)
+          .or(`user_id.eq.${currentSession.user.id},user_email.eq.${currentSession.user.email}`)
           .eq("status", "completed")
           .order("created_at", { ascending: false })
           .limit(1)
-          .maybeSingle()
-          .then(async ({ data }) => {
-            setBookingAccess(data);
-            if (data) {
-              const { data: contact } = await client
-                .from("trek_guide_contacts")
-                .select("guide_name, guide_email, guide_phone, guide_notes")
-                .eq("trek_id", trekId)
-                .maybeSingle();
-              setGuideContact(contact);
-            }
-          });
+          .maybeSingle();
+        setBookingAccess(data);
+        if (data) {
+          const { data: contact } = await client
+            .from("trek_guide_contacts")
+            .select("guide_name, guide_email, guide_phone, guide_notes")
+            .eq("trek_id", trekId)
+            .maybeSingle();
+          setGuideContact(contact);
+        }
       } else {
         setBookingAccess(null);
         setGuideContact(null);
       }
+      setBookingAccessLoading(false);
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+      void loadBookingAccess(currentSession);
     });
+    void client.auth.getSession().then(({ data }) => loadBookingAccess(data.session));
 
     // Cleanup subscription on unmount
     return () => {
@@ -294,9 +298,9 @@ export default function TrekDetailPage() {
                 { icon: "📍", label: "Location", value: trek.location },
               ].map((stat, i) => (
                 <div key={i} className="bg-gradient-to-br from-teal-50 to-blue-50 p-4 rounded-lg border-2 border-teal-200">
-                  <div className="text-[2.25rem] mb-3">{stat.icon}</div>
-                  <p className="text-sm font-black text-gray-900 mb-1">{stat.label}</p>
-                  <p className="font-black text-[1.125rem] text-teal-700">{stat.value}</p>
+                  <div className="text-[1.75rem] mb-2">{stat.icon}</div>
+                  <p className="text-xs font-black text-gray-900 mb-1">{stat.label}</p>
+                  <p className="font-black text-base text-teal-700">{stat.value}</p>
                 </div>
               ))}
             </div>
@@ -439,7 +443,7 @@ export default function TrekDetailPage() {
                     )}
                   </div>
                 )}
-                {session && !bookingAccess ? (
+                {!bookingAccessLoading && session && !bookingAccess ? (
                   <CheckoutButton
                     trekId={trek.id}
                     trekTitle={trek.title}
@@ -458,7 +462,7 @@ export default function TrekDetailPage() {
                       alert(`Booking failed: ${error}`);
                     }}
                   />
-                ) : (
+                ) : !bookingAccessLoading && !bookingAccess ? (
                   <div className="space-y-3">
                     <p className="text-sm text-gray-600 text-center">
                       Please log in to book this trek
@@ -474,9 +478,9 @@ export default function TrekDetailPage() {
                       className="block w-full border-2 border-teal-600 text-teal-600 text-center py-3 rounded-lg font-bold hover:bg-teal-50 transition"
                     >
                       Create Account
-                    </Link>
-                  </div>
-                )}
+                      </Link>
+                    </div>
+                  ) : null}
               </div>
 
               {/* Trust Badges */}

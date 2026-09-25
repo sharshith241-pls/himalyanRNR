@@ -172,6 +172,8 @@ export default function CheckoutButton({
           discountAmount: discountInfo?.discountAmount || 0,
           finalAmount: discountInfo?.finalAmount || selectedAmount,
           couponCode: couponCode || null,
+          slotId: slotId || null,
+          slotDate: slotDate || null,
         })
       );
 
