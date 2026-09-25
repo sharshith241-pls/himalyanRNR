@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { supabase } from "@/utils/supabase/client";
 
 interface PaymentInfo {
   trekId?: string;
@@ -13,6 +14,20 @@ interface PaymentInfo {
   paymentType?: "advance" | "full";
   hasFullAccess?: boolean;
   bookingId?: string;
+  slotDate?: string;
+}
+
+interface BookedTrek {
+  duration?: string;
+  difficulty?: string;
+  location?: string;
+}
+
+interface ContactPerson {
+  guide_name: string;
+  guide_email?: string | null;
+  guide_phone?: string | null;
+  guide_notes?: string | null;
 }
 
 interface GeneratedCoupon {
@@ -30,6 +45,8 @@ export function SuccessPageContent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [bookedTrek, setBookedTrek] = useState<BookedTrek | null>(null);
+  const [contactPerson, setContactPerson] = useState<ContactPerson | null>(null);
 
   useEffect(() => {
     const initializePayment = async () => {
@@ -85,7 +102,17 @@ export function SuccessPageContent() {
             paymentType: confirmation.booking.payment_type,
             hasFullAccess: confirmation.booking.has_full_access,
             bookingId: confirmation.booking.id,
+            slotDate: confirmation.booking.slot_date || storedPaymentInfo?.slotDate,
           });
+
+          if (supabase) {
+            const [{ data: trekData }, { data: contactData }] = await Promise.all([
+              supabase.from("treks").select("duration, difficulty, location").eq("id", confirmedPaymentInfo.trekId).maybeSingle(),
+              supabase.from("trek_guide_contacts").select("guide_name, guide_email, guide_phone, guide_notes").eq("trek_id", confirmedPaymentInfo.trekId).maybeSingle(),
+            ]);
+            setBookedTrek(trekData);
+            setContactPerson(contactData);
+          }
 
           // Only generate coupon if this is their first trek booking
           if (confirmedPaymentInfo.trekId && (paymentId || "local-payment")) {
@@ -185,7 +212,7 @@ export function SuccessPageContent() {
 
         {/* Payment Details */}
         {paymentInfo && (
-          <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
+          <div id="print-confirmation" className="bg-white rounded-lg shadow-lg p-8 mb-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Booking Details</h2>
             <div className="space-y-3 border-t pt-4">
               <div className="flex justify-between items-center">
@@ -220,7 +247,30 @@ export function SuccessPageContent() {
                   </span>
                 </div>
               )}
+              {paymentInfo.slotDate && (
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Trek Date</span>
+                  <span className="font-semibold text-gray-800">{new Date(`${paymentInfo.slotDate}T00:00:00`).toLocaleDateString("en-IN", { dateStyle: "long" })}</span>
+                </div>
+              )}
+              {bookedTrek && (
+                <div className="grid gap-3 border-t pt-4 sm:grid-cols-3">
+                  <div><p className="text-xs text-gray-500">Duration</p><p className="font-semibold text-gray-800">{bookedTrek.duration || "-"}</p></div>
+                  <div><p className="text-xs text-gray-500">Difficulty</p><p className="font-semibold text-gray-800">{bookedTrek.difficulty || "-"}</p></div>
+                  <div><p className="text-xs text-gray-500">Location</p><p className="font-semibold text-gray-800">{bookedTrek.location || "-"}</p></div>
+                </div>
+              )}
+              {contactPerson && (
+                <div className="border-t pt-4">
+                  <h3 className="mb-2 font-bold text-gray-800">Contact Person</h3>
+                  <p className="text-gray-700">{contactPerson.guide_name}</p>
+                  {contactPerson.guide_email && <p className="text-gray-700">{contactPerson.guide_email}</p>}
+                  {contactPerson.guide_phone && <p className="text-gray-700">{contactPerson.guide_phone}</p>}
+                  {contactPerson.guide_notes && <p className="mt-2 whitespace-pre-line text-gray-700"><strong>Important Information:</strong> {contactPerson.guide_notes}</p>}
+                </div>
+              )}
             </div>
+            <button type="button" onClick={() => window.print()} className="no-print mt-5 w-full rounded-lg bg-teal-600 py-3 font-semibold text-white hover:bg-teal-700">Download confirmation PDF</button>
           </div>
         )}
 

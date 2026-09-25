@@ -47,6 +47,13 @@ interface GuideContact {
   guide_notes?: string | null;
 }
 
+interface AvailabilitySlot {
+  id: string;
+  slot_date: string;
+  capacity: number;
+  booked_count: number;
+}
+
 const DEMO_TREKS: Record<string, Trek> = {};
 // NOTE: Demo treks removed. Only database treks are displayed.
 
@@ -60,6 +67,8 @@ export default function TrekDetailPage() {
   const [itineraries, setItineraries] = useState<ItineraryItem[]>([]);
   const [bookingAccess, setBookingAccess] = useState<BookingAccess | null>(null);
   const [guideContact, setGuideContact] = useState<GuideContact | null>(null);
+  const [availabilitySlots, setAvailabilitySlots] = useState<AvailabilitySlot[]>([]);
+  const [selectedSlotId, setSelectedSlotId] = useState("");
   const { isAdmin } = useAdminCheck();
 
   useEffect(() => {
@@ -134,6 +143,12 @@ export default function TrekDetailPage() {
             .eq("trek_id", trekId)
             .order("day", { ascending: true });
           setItineraries(itineraryData || []);
+          const { data: slotData } = await supabase
+            .from("trek_availability_slots")
+            .select("id, slot_date, capacity, booked_count")
+            .eq("trek_id", trekId)
+            .order("slot_date", { ascending: true });
+          setAvailabilitySlots(slotData || []);
         }
       } catch (err) {
         setTrek(null);
@@ -279,9 +294,9 @@ export default function TrekDetailPage() {
                 { icon: "📍", label: "Location", value: trek.location },
               ].map((stat, i) => (
                 <div key={i} className="bg-gradient-to-br from-teal-50 to-blue-50 p-4 rounded-lg border-2 border-teal-200">
-                  <div className="text-4xl mb-3">{stat.icon}</div>
+                  <div className="text-[2.25rem] mb-3">{stat.icon}</div>
                   <p className="text-sm font-black text-gray-900 mb-1">{stat.label}</p>
-                  <p className="font-black text-lg text-teal-700">{stat.value}</p>
+                  <p className="font-black text-[1.125rem] text-teal-700">{stat.value}</p>
                 </div>
               ))}
             </div>
@@ -393,16 +408,33 @@ export default function TrekDetailPage() {
 
               {/* Checkout Button */}
               <div>
+                {availabilitySlots.length > 0 && (
+                  <div className="mb-4 rounded-lg border border-teal-200 bg-teal-50 p-4">
+                    <h3 className="mb-3 text-lg font-bold text-gray-900">Choose a trek date</h3>
+                    <div className="space-y-2">
+                      {availabilitySlots.filter((slot) => slot.capacity - slot.booked_count > 0).map((slot) => (
+                        <label key={slot.id} className={`flex cursor-pointer items-center justify-between gap-3 rounded-lg border p-3 ${selectedSlotId === slot.id ? "border-teal-600 bg-white" : "border-teal-100 bg-white/70"}`}>
+                          <span className="flex items-center gap-3">
+                            <input type="radio" name="trek-slot" checked={selectedSlotId === slot.id} onChange={() => setSelectedSlotId(slot.id)} />
+                            <span className="font-semibold text-gray-900">{new Date(`${slot.slot_date}T00:00:00`).toLocaleDateString("en-IN", { dateStyle: "medium" })}</span>
+                          </span>
+                          <span className="text-sm font-semibold text-teal-700">{slot.capacity - slot.booked_count} places left</span>
+                        </label>
+                      ))}
+                    </div>
+                    <p className="mt-3 text-sm text-gray-700">{trek.duration} · {trek.difficulty} · {trek.location}</p>
+                  </div>
+                )}
                 {bookingAccess && (
                   <div className="mb-4 space-y-4 rounded-lg border border-green-200 bg-green-50 p-4 text-sm text-green-800">
                     <p><strong>Payment completed.</strong> You have {bookingAccess.has_full_access ? "full access" : "an active advance reservation"} for this trek.</p>
                     {guideContact && (
                       <div className="rounded-lg border border-green-200 bg-white p-4 text-gray-800">
-                        <h3 className="mb-2 text-lg font-bold">Your Trek Guide</h3>
+                        <h3 className="mb-2 text-lg font-bold">Your Contact Person</h3>
                         <p><strong>Name:</strong> {guideContact.guide_name}</p>
                         {guideContact.guide_email && <p><strong>Email:</strong> {guideContact.guide_email}</p>}
                         {guideContact.guide_phone && <p><strong>Phone:</strong> {guideContact.guide_phone}</p>}
-                        {guideContact.guide_notes && <p className="mt-2"><strong>Notes:</strong> {guideContact.guide_notes}</p>}
+                        {guideContact.guide_notes && <p className="mt-2 whitespace-pre-line"><strong>Important Information:</strong> {guideContact.guide_notes}</p>}
                       </div>
                     )}
                   </div>
@@ -416,6 +448,9 @@ export default function TrekDetailPage() {
                     userEmail={session.user.email}
                     userName={session.user.user_metadata?.name || session.user.email}
                     userId={session.user.id}
+                    slotId={selectedSlotId || undefined}
+                    slotDate={availabilitySlots.find((slot) => slot.id === selectedSlotId)?.slot_date}
+                    slotRequired={availabilitySlots.length > 0}
                     onSuccess={() => {
                       alert("Booking successful! Check your email for confirmation.");
                     }}

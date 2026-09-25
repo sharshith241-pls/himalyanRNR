@@ -67,10 +67,12 @@ export async function POST(request: NextRequest) {
         full_amount: Number(notes.fullAmount || Number(paymentLink.amount) / 100),
         payment_type: paymentType,
         has_full_access: paymentType === "full",
+        slot_id: notes.slotId ? String(notes.slotId) : null,
+        slot_date: notes.slotDate ? String(notes.slotDate) : null,
         currency: paymentLink.currency || "INR",
         updated_at: new Date().toISOString(),
       }, { onConflict: "razorpay_payment_id" })
-      .select("id, trek_id, amount, payment_type, has_full_access")
+      .select("id, trek_id, amount, payment_type, has_full_access, slot_date")
       .single();
 
     if (error) {

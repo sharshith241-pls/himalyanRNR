@@ -24,6 +24,7 @@ interface Booking {
   amount: number;
   payment_type: "advance" | "full";
   has_full_access: boolean;
+  slot_date?: string | null;
   trek?: { title: string }[];
 }
 
@@ -58,7 +59,7 @@ export default function HomePage() {
       if (session?.user?.id) {
         client
           .from("bookings")
-          .select("id, trek_id, amount, payment_type, has_full_access, trek:trek_id(title)")
+          .select("id, trek_id, amount, payment_type, has_full_access, slot_date, trek:trek_id(title)")
           .or(`user_id.eq.${session.user.id},user_email.eq.${session.user.email}`)
           .eq("status", "completed")
           .order("created_at", { ascending: false })
@@ -227,6 +228,7 @@ export default function HomePage() {
                     <p className="font-bold text-gray-900">{booking.trek?.[0]?.title || "Booked trek"}</p>
                     <p className="text-sm text-gray-600">Paid ₹{Number(booking.amount).toLocaleString("en-IN")} ({booking.payment_type === "full" ? "full payment" : "advance payment"})</p>
                     <p className="text-sm font-semibold text-green-700">{booking.has_full_access ? "Full access confirmed" : "Advance reservation confirmed"}</p>
+                    {booking.slot_date && <p className="text-sm text-teal-700">Trek date: {new Date(`${booking.slot_date}T00:00:00`).toLocaleDateString("en-IN", { dateStyle: "medium" })}</p>}
                   </div>
                   <Link href={`/treks/${booking.trek_id}`} className="shrink-0 rounded-lg bg-teal-600 px-4 py-2 text-sm font-semibold text-white hover:bg-teal-700">View trek</Link>
                 </div>

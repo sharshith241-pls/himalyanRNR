@@ -127,6 +127,19 @@ textarea::placeholder {
     background: white;
   }
 
+  #print-confirmation,
+  #print-confirmation * {
+    visibility: visible !important;
+  }
+
+  #print-confirmation {
+    position: absolute;
+    inset: 0;
+    padding: 2rem;
+    color: #111827;
+    background: white;
+  }
+
   .no-print {
     display: none !important;
   }

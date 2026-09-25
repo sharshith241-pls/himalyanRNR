@@ -127,6 +127,73 @@ ALTER TABLE public.bookings
 ALTER TABLE public.bookings
   ADD CONSTRAINT bookings_payment_type_check CHECK (payment_type IN ('advance', 'full'));
 
+-- ============================================================================
+-- 5B) TREK AVAILABILITY SLOTS
+-- ============================================================================
+CREATE TABLE IF NOT EXISTS public.trek_availability_slots (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  trek_id uuid NOT NULL REFERENCES public.treks(id) ON DELETE CASCADE,
+  slot_date date NOT NULL,
+  capacity integer NOT NULL DEFAULT 10 CHECK (capacity > 0),
+  booked_count integer NOT NULL DEFAULT 0 CHECK (booked_count >= 0),
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now(),
+  UNIQUE (trek_id, slot_date)
+);
+
+CREATE INDEX IF NOT EXISTS idx_trek_availability_trek_date
+  ON public.trek_availability_slots(trek_id, slot_date);
+ALTER TABLE public.trek_availability_slots ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE public.bookings
+  ADD COLUMN IF NOT EXISTS slot_id uuid REFERENCES public.trek_availability_slots(id) ON DELETE SET NULL;
+ALTER TABLE public.bookings
+  ADD COLUMN IF NOT EXISTS slot_date date;
+CREATE INDEX IF NOT EXISTS idx_bookings_slot_id ON public.bookings(slot_id);
+
+DROP POLICY IF EXISTS trek_availability_select ON public.trek_availability_slots;
+CREATE POLICY trek_availability_select ON public.trek_availability_slots FOR SELECT USING (true);
+DROP POLICY IF EXISTS trek_availability_insert ON public.trek_availability_slots;
+CREATE POLICY trek_availability_insert ON public.trek_availability_slots FOR INSERT WITH CHECK (
+  EXISTS (SELECT 1 FROM public.treks WHERE id = trek_availability_slots.trek_id AND guide_id = auth.uid())
+  OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+);
+DROP POLICY IF EXISTS trek_availability_update ON public.trek_availability_slots;
+CREATE POLICY trek_availability_update ON public.trek_availability_slots FOR UPDATE USING (
+  EXISTS (SELECT 1 FROM public.treks WHERE id = trek_availability_slots.trek_id AND guide_id = auth.uid())
+  OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+);
+DROP POLICY IF EXISTS trek_availability_delete ON public.trek_availability_slots;
+CREATE POLICY trek_availability_delete ON public.trek_availability_slots FOR DELETE USING (
+  EXISTS (SELECT 1 FROM public.treks WHERE id = trek_availability_slots.trek_id AND guide_id = auth.uid())
+  OR EXISTS (SELECT 1 FROM public.profiles WHERE id = auth.uid() AND role = 'admin')
+);
+
+CREATE OR REPLACE FUNCTION public.reserve_trek_availability_slot()
+RETURNS trigger
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  IF NEW.slot_id IS NOT NULL THEN
+    UPDATE public.trek_availability_slots
+    SET booked_count = booked_count + 1,
+        updated_at = now()
+    WHERE id = NEW.slot_id
+      AND booked_count < capacity;
+
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'The selected trek date is no longer available';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS reserve_trek_availability_slot ON public.bookings;
+CREATE TRIGGER reserve_trek_availability_slot
+  AFTER INSERT ON public.bookings
+  FOR EACH ROW EXECUTE FUNCTION public.reserve_trek_availability_slot();
+
 
 -- ============================================================================
 -- 5A) PROTECTED GUIDE CONTACTS

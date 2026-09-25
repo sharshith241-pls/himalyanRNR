@@ -81,7 +81,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { trekId, trekTitle, amount, userEmail, userName, couponCode, userId, paymentType = "full", fullAmount = amount } = body;
+    const { trekId, trekTitle, amount, userEmail, userName, couponCode, userId, slotId, slotDate, paymentType = "full", fullAmount = amount } = body;
 
     // Validate all required fields
     if (!trekId || !trekTitle || !amount || !userEmail || !userName) {
@@ -236,6 +236,8 @@ export async function POST(request: NextRequest) {
           discountPercentage: couponDiscountPercentage,
           couponCode: couponCode || null,
           userId: userId || null,
+          slotId: slotId || null,
+          slotDate: slotDate || null,
         },
         callback_method: "get",
       };

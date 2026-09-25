@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/utils/supabase/client";
 import Link from "next/link";
+import TrekAvailabilitySlots, { AvailabilitySlot } from "@/components/TrekAvailabilitySlots";
 
 interface Trek {
   id: string;
@@ -45,6 +46,7 @@ export default function EditTrekPage() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
+  const [availabilitySlots, setAvailabilitySlots] = useState<AvailabilitySlot[]>([]);
   const [guideContact, setGuideContact] = useState<GuideContact>({ guide_name: "", guide_email: "", guide_phone: "", guide_notes: "" });
 
   const [formData, setFormData] = useState<Trek>({
@@ -86,6 +88,13 @@ export default function EditTrekPage() {
           .order("day", { ascending: true });
         if (itineraryError) throw itineraryError;
         setItineraries(itineraryData || [{ day: 1, title: "", description: "" }]);
+        const { data: slotData, error: slotError } = await supabase
+          .from("trek_availability_slots")
+          .select("id, slot_date, capacity, booked_count")
+          .eq("trek_id", trekId)
+          .order("slot_date", { ascending: true });
+        if (slotError) throw slotError;
+        setAvailabilitySlots(slotData || []);
         const { data: guideData } = await supabase.from("trek_guide_contacts").select("guide_name, guide_email, guide_phone, guide_notes").eq("trek_id", trekId).maybeSingle();
         if (guideData) setGuideContact(guideData);
         setLoading(false);
@@ -141,6 +150,19 @@ export default function EditTrekPage() {
         if (guideError) {
           throw new Error(`Trek details were saved, but guide details could not be saved: ${guideError.message}`);
         }
+      }
+
+      const { error: deleteSlotsError } = await supabase.from("trek_availability_slots").delete().eq("trek_id", trekId);
+      if (deleteSlotsError) throw deleteSlotsError;
+      const slotRows = availabilitySlots.filter((slot) => slot.slot_date).map((slot) => ({
+        trek_id: trekId,
+        slot_date: slot.slot_date,
+        capacity: slot.capacity,
+        booked_count: slot.booked_count || 0,
+      }));
+      if (slotRows.length) {
+        const { error: insertSlotsError } = await supabase.from("trek_availability_slots").insert(slotRows);
+        if (insertSlotsError) throw insertSlotsError;
       }
 
       router.push("/admin/treks");
@@ -230,11 +252,11 @@ export default function EditTrekPage() {
             </div>
 
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-3">
-              <h3 className="font-bold text-gray-900">Guide Contact (shown only after booking)</h3>
+              <h3 className="font-bold text-gray-900">Contact Person (shown only after booking)</h3>
               <input value={guideContact.guide_name} onChange={(e) => setGuideContact({ ...guideContact, guide_name: e.target.value })} placeholder="Guide name" className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" required />
               <input type="email" value={guideContact.guide_email} onChange={(e) => setGuideContact({ ...guideContact, guide_email: e.target.value })} placeholder="Guide email" className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
               <input value={guideContact.guide_phone} onChange={(e) => setGuideContact({ ...guideContact, guide_phone: e.target.value })} placeholder="Guide phone" className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
-              <textarea value={guideContact.guide_notes} onChange={(e) => setGuideContact({ ...guideContact, guide_notes: e.target.value })} placeholder="Meeting instructions or other guide notes" rows={2} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
+              <textarea value={guideContact.guide_notes} onChange={(e) => setGuideContact({ ...guideContact, guide_notes: e.target.value })} placeholder="Important information for the trek" rows={3} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
             </div>
 
             {/* Duration */}
@@ -311,6 +333,8 @@ export default function EditTrekPage() {
                   ))}
                 </div>
               </div>
+
+              <TrekAvailabilitySlots slots={availabilitySlots} onChange={setAvailabilitySlots} />
 
               {/* What's Included */}
               <div>

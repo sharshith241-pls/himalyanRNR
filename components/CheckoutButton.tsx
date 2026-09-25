@@ -10,6 +10,9 @@ interface CheckoutProps {
   userEmail: string;
   userName: string;
   userId?: string;
+  slotId?: string;
+  slotDate?: string;
+  slotRequired?: boolean;
   onSuccess?: (paymentData: any) => void;
   onError?: (error: string) => void;
 }
@@ -22,6 +25,9 @@ export default function CheckoutButton({
   userEmail,
   userName,
   userId,
+  slotId,
+  slotDate,
+  slotRequired = false,
   onSuccess,
   onError,
 }: CheckoutProps) {
@@ -44,6 +50,11 @@ export default function CheckoutButton({
   const validateInputs = (): boolean => {
     if (!trekId || !trekTitle || !selectedAmount || !userEmail || !userName) {
       setError("Missing booking information. Please try again.");
+      return false;
+    }
+
+    if (slotRequired && (!slotId || !slotDate)) {
+      setError("Please choose an available trek date before continuing.");
       return false;
     }
 
@@ -133,6 +144,8 @@ export default function CheckoutButton({
           userEmail,
           userName,
           userId,
+          slotId,
+          slotDate,
           couponCode: couponCode || null,
         }),
       });

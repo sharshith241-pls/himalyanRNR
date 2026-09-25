@@ -6,6 +6,7 @@ import { supabase } from "@/utils/supabase/client";
 import { uploadTrekImage } from "@/utils/supabase/storage";
 import Link from "next/link";
 import Image from "next/image";
+import TrekAvailabilitySlots, { AvailabilitySlot } from "@/components/TrekAvailabilitySlots";
 
 interface ItineraryDraft {
   day: number;
@@ -23,6 +24,7 @@ export default function NewTrekPage() {
   const [itineraries, setItineraries] = useState<ItineraryDraft[]>([
     { day: 1, title: "", description: "" },
   ]);
+  const [availabilitySlots, setAvailabilitySlots] = useState<AvailabilitySlot[]>([]);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -179,6 +181,18 @@ export default function NewTrekPage() {
         if (guideError) throw guideError;
       }
 
+      if (data?.id && availabilitySlots.length) {
+        const slotRows = availabilitySlots.filter((slot) => slot.slot_date).map((slot) => ({
+          trek_id: data.id,
+          slot_date: slot.slot_date,
+          capacity: slot.capacity,
+        }));
+        if (slotRows.length) {
+          const { error: slotError } = await supabase.from("trek_availability_slots").insert(slotRows);
+          if (slotError) throw slotError;
+        }
+      }
+
       router.push("/admin/treks");
       router.refresh();
     } catch (err: any) {
@@ -280,11 +294,11 @@ text-gray-900
             </div>
 
             <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 space-y-3">
-              <h3 className="font-bold text-gray-900">Guide Contact (shown only after booking)</h3>
+              <h3 className="font-bold text-gray-900">Contact Person (shown only after booking)</h3>
               <input name="guide_name" value={formData.guide_name} onChange={handleChange} placeholder="Guide name" className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" required />
               <input type="email" name="guide_email" value={formData.guide_email} onChange={handleChange} placeholder="Guide email" className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
               <input name="guide_phone" value={formData.guide_phone} onChange={handleChange} placeholder="Guide phone" className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
-              <textarea name="guide_notes" value={formData.guide_notes} onChange={handleChange} placeholder="Meeting instructions or other guide notes" rows={2} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
+              <textarea name="guide_notes" value={formData.guide_notes} onChange={handleChange} placeholder="Important information for the trek" rows={3} className="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-900" />
             </div>
 
             {/* Duration */}
@@ -379,6 +393,8 @@ text-gray-900
                   ))}
                 </div>
               </div>
+
+              <TrekAvailabilitySlots slots={availabilitySlots} onChange={setAvailabilitySlots} />
 
               {/* What's Included */}
               <div>
