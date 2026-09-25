@@ -291,16 +291,16 @@ export default function TrekDetailPage() {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-8">
             {/* Quick Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
               {[
                 { icon: "⏱️", label: "Duration", value: trek.duration },
                 { icon: "📈", label: "Difficulty", value: trek.difficulty },
                 { icon: "📍", label: "Location", value: trek.location },
               ].map((stat, i) => (
-                <div key={i} className="min-w-0 bg-gradient-to-br from-teal-50 to-blue-50 p-3 rounded-lg border-2 border-teal-200">
-                  <div className="text-[1.5rem] mb-1">{stat.icon}</div>
-                  <p className="text-[0.7rem] font-black text-gray-900 mb-1">{stat.label}</p>
-                  <p className="break-words font-black text-sm text-teal-700">{stat.value}</p>
+                <div key={i} className="min-w-0 bg-gradient-to-br from-teal-50 to-blue-50 p-2 sm:p-3 rounded-lg border-2 border-teal-200">
+                  <div className="text-[1.25rem] sm:text-[1.5rem] mb-1">{stat.icon}</div>
+                  <p className="text-[0.6rem] sm:text-[0.7rem] font-black text-gray-900 mb-1">{stat.label}</p>
+                  <p className="break-words text-xs sm:text-sm font-black text-teal-700">{stat.value}</p>
                 </div>
               ))}
             </div>
