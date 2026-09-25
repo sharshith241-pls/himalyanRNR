@@ -307,7 +307,14 @@ export default function TrekDetailPage() {
 
             {/* Description */}
             <div>
-              <h2 className="text-3xl md:text-4xl font-black mb-4 text-gray-900">About This Trek</h2>
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                <h2 className="text-3xl md:text-4xl font-black text-gray-900">About This Trek</h2>
+                {!bookingAccessLoading && !session && !bookingAccess && (
+                  <Link href="/auth/login" className="rounded-lg bg-teal-600 px-4 py-2 text-sm font-bold text-white hover:bg-teal-700">
+                    Log In to Book
+                  </Link>
+                )}
+              </div>
               <p className="text-gray-800 text-lg leading-relaxed font-medium">{trek.description}</p>
             </div>
 

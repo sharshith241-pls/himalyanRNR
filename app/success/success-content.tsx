@@ -173,34 +173,34 @@ export function SuccessPageContent() {
   const downloadConfirmationPdf = () => {
     if (!paymentInfo) return;
 
-    const document = new jsPDF();
-    const pageWidth = document.internal.pageSize.getWidth();
+    const pdfDocument = new jsPDF();
+    const pageWidth = pdfDocument.internal.pageSize.getWidth();
     const margin = 18;
     let y = 22;
 
-    document.setFillColor(0, 137, 123);
-    document.rect(0, 0, pageWidth, 12, "F");
-    document.setTextColor(17, 24, 39);
-    document.setFontSize(20);
-    document.setFont("helvetica", "bold");
-    document.text("Himalayan Runners", margin, y);
+    pdfDocument.setFillColor(0, 137, 123);
+    pdfDocument.rect(0, 0, pageWidth, 12, "F");
+    pdfDocument.setTextColor(17, 24, 39);
+    pdfDocument.setFontSize(20);
+    pdfDocument.setFont("helvetica", "bold");
+    pdfDocument.text("Himalayan Runners", margin, y);
     y += 10;
-    document.setFontSize(16);
-    document.text("Trek Booking Confirmation", margin, y);
+    pdfDocument.setFontSize(16);
+    pdfDocument.text("Trek Booking Confirmation", margin, y);
     y += 12;
 
     const addSection = (heading: string, rows: string[]) => {
-      document.setTextColor(0, 105, 92);
-      document.setFontSize(12);
-      document.setFont("helvetica", "bold");
-      document.text(heading, margin, y);
+      pdfDocument.setTextColor(0, 105, 92);
+      pdfDocument.setFontSize(12);
+      pdfDocument.setFont("helvetica", "bold");
+      pdfDocument.text(heading, margin, y);
       y += 7;
-      document.setTextColor(31, 41, 55);
-      document.setFontSize(10);
-      document.setFont("helvetica", "normal");
+      pdfDocument.setTextColor(31, 41, 55);
+      pdfDocument.setFontSize(10);
+      pdfDocument.setFont("helvetica", "normal");
       rows.forEach((row) => {
-        const wrapped = document.splitTextToSize(row, pageWidth - margin * 2);
-        document.text(wrapped, margin, y);
+        const wrapped = pdfDocument.splitTextToSize(row, pageWidth - margin * 2);
+        pdfDocument.text(wrapped, margin, y);
         y += wrapped.length * 5 + 2;
       });
       y += 4;
@@ -232,10 +232,19 @@ export function SuccessPageContent() {
       ]);
     }
 
-    document.setFontSize(9);
-    document.setTextColor(107, 114, 128);
-    document.text("Keep this confirmation ticket for your trek.", margin, Math.min(y + 5, 280));
-    document.save(`himalayan-runners-${paymentInfo.bookingId || "booking"}.pdf`);
+    pdfDocument.setFontSize(9);
+    pdfDocument.setTextColor(107, 114, 128);
+    pdfDocument.text("Keep this confirmation ticket for your trek.", margin, Math.min(y + 5, 280));
+
+    const pdfBlob = pdfDocument.output("blob");
+    const downloadUrl = URL.createObjectURL(pdfBlob);
+    const downloadLink = window.document.createElement("a");
+    downloadLink.href = downloadUrl;
+    downloadLink.download = `himalayan-runners-${paymentInfo.bookingId || "booking"}.pdf`;
+    window.document.body.appendChild(downloadLink);
+    downloadLink.click();
+    downloadLink.remove();
+    window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 1000);
   };
 
   if (loading) {
