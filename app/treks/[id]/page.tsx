@@ -407,13 +407,13 @@ export default function TrekDetailPage() {
                   </article>
                 )) : <p className="text-gray-800 whitespace-pre-line leading-relaxed font-medium text-base">{trek.itinerary || "Itinerary will be announced soon."}</p>}
               </div>
-              <button type="button" onClick={() => window.print()} className="no-print mt-4 rounded-lg bg-teal-600 px-5 py-3 font-semibold text-white hover:bg-teal-700">
+              <button type="button" onClick={() => window.print()} className="no-print mt-4 w-full rounded-lg bg-teal-600 px-5 py-3 font-semibold text-white hover:bg-teal-700 sm:w-auto">
                 Download itinerary PDF
               </button>
             </div>
 
             {/* What's Included */}
-            <div className="overflow-x-auto rounded-lg border border-gray-200">
+            <div className="hidden overflow-x-auto rounded-lg border border-gray-200 md:block">
               <table className="w-full min-w-[620px] border-collapse text-left">
                 <thead>
                   <tr className="bg-gray-50">
@@ -430,6 +430,32 @@ export default function TrekDetailPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <div className="space-y-5 md:hidden">
+              <section className="rounded-lg border border-green-200 bg-green-50 p-4">
+                <h2 className="mb-3 text-xl font-black text-gray-900">✅ What's Included</h2>
+                <div className="space-y-2">
+                  {trek.included?.split(",").filter((item) => item.trim()).map((item, i) => (
+                    <div key={i} className="flex items-start gap-2 border-b border-green-100 pb-2 text-sm font-semibold text-gray-800 last:border-0 last:pb-0">
+                      <span className="flex-shrink-0 text-green-700">✓</span>
+                      <span>{item.trim()}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="rounded-lg border border-red-200 bg-red-50 p-4">
+                <h2 className="mb-3 text-xl font-black text-gray-900">❌ What's NOT Included</h2>
+                <div className="space-y-2">
+                  {trek.not_included?.split(",").filter((item) => item.trim()).map((item, i) => (
+                    <div key={i} className="flex items-start gap-2 border-b border-red-100 pb-2 text-sm font-semibold text-gray-800 last:border-0 last:pb-0">
+                      <span className="flex-shrink-0 text-red-600">✗</span>
+                      <span>{item.trim()}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
             </div>
 
             {/* Additional Info */}
@@ -464,7 +490,7 @@ export default function TrekDetailPage() {
 
           {/* Booking Sidebar */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-xl shadow-xl p-8 sticky top-24 space-y-6">
+            <div className="sticky top-24 space-y-6 rounded-xl bg-white p-5 shadow-xl sm:p-8">
               {/* Price Section */}
               <div>
                 <p className="text-gray-600 text-sm mb-2">Starting from</p>
