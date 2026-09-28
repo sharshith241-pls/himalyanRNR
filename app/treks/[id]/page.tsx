@@ -413,30 +413,23 @@ export default function TrekDetailPage() {
             </div>
 
             {/* What's Included */}
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h2 className="text-3xl font-black mb-4 text-gray-900">✅ What's Included</h2>
-                <div className="space-y-3">
-                  {trek.included?.split(",").map((item, i) => (
-                    <div key={i} className="flex items-start gap-3 p-2 hover:bg-green-50 rounded transition">
-                      <span className="text-2xl flex-shrink-0">✓</span>
-                      <span className="text-gray-800 font-semibold text-base">{item.trim()}</span>
-                    </div>
+            <div className="overflow-x-auto rounded-lg border border-gray-200">
+              <table className="w-full min-w-[620px] border-collapse text-left">
+                <thead>
+                  <tr className="bg-gray-50">
+                    <th className="w-1/2 border-b border-gray-200 px-4 py-3 text-lg font-black text-gray-900">✅ What's Included</th>
+                    <th className="w-1/2 border-b border-gray-200 px-4 py-3 text-lg font-black text-gray-900">❌ What's NOT Included</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Array.from({ length: Math.max(trek.included?.split(",").filter(Boolean).length || 0, trek.not_included?.split(",").filter(Boolean).length || 0) }).map((_, i) => (
+                    <tr key={i} className="align-top">
+                      <td className="border-b border-gray-100 px-4 py-3 text-sm font-semibold text-gray-800"><span className="mr-2 text-green-600">✓</span>{trek.included?.split(",")[i]?.trim() || "-"}</td>
+                      <td className="border-b border-gray-100 px-4 py-3 text-sm font-semibold text-gray-800"><span className="mr-2 text-red-500">✗</span>{trek.not_included?.split(",")[i]?.trim() || "-"}</td>
+                    </tr>
                   ))}
-                </div>
-              </div>
-
-              <div>
-                <h2 className="text-3xl font-black mb-4 text-gray-900">❌ What's NOT Included</h2>
-                <div className="space-y-3">
-                  {trek.not_included?.split(",").map((item, i) => (
-                    <div key={i} className="flex items-start gap-3 p-2 hover:bg-red-50 rounded transition">
-                      <span className="text-2xl flex-shrink-0">✗</span>
-                      <span className="text-gray-800 font-semibold text-base">{item.trim()}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
+                </tbody>
+              </table>
             </div>
 
             {/* Additional Info */}

@@ -209,6 +209,13 @@ export async function POST(request: NextRequest) {
       const configuredAppUrl = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
       const requestOrigin = request.headers.get("origin")?.replace(/\/$/, "");
       const appUrl = configuredAppUrl || requestOrigin;
+
+      if (process.env.NODE_ENV === "production" && (!appUrl || !/^https:\/\//i.test(appUrl))) {
+        return NextResponse.json(
+          { error: "Payment callback is not configured. Set NEXT_PUBLIC_APP_URL to the live HTTPS website URL." },
+          { status: 503, headers }
+        );
+      }
       
       // Build payment link configuration
       const paymentLinkConfig: any = {

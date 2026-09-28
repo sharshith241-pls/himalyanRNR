@@ -275,6 +275,10 @@ export default function CheckoutButton({
         )}
       </button>
 
+      <p className="text-center text-xs leading-5 text-gray-500">
+        Secure payment via Razorpay hosted checkout. Your payment details are handled by Razorpay, and your booking is confirmed only after payment verification.
+      </p>
+
       {error && (
         <div className="mt-3 p-3 bg-red-100 border border-red-200 rounded-lg">
           <p className="text-red-700 text-sm font-medium">⚠️ {error}</p>

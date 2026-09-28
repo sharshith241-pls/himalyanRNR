@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { supabase } from "@/utils/supabase/client";
+import { uploadTrekImage } from "@/utils/supabase/storage";
 import Link from "next/link";
 import TrekAvailabilitySlots, { AvailabilitySlot } from "@/components/TrekAvailabilitySlots";
 
@@ -44,6 +45,9 @@ export default function EditTrekPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [itineraries, setItineraries] = useState<Itinerary[]>([]);
   const [availabilitySlots, setAvailabilitySlots] = useState<AvailabilitySlot[]>([]);
@@ -114,6 +118,18 @@ export default function EditTrekPage() {
     });
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return setError("Please select a valid image file");
+    if (file.size > 5 * 1024 * 1024) return setError("Image size must be less than 5MB");
+    setSelectedImage(file);
+    setError("");
+    const reader = new FileReader();
+    reader.onloadend = () => setImagePreview(reader.result as string);
+    reader.readAsDataURL(file);
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
@@ -126,6 +142,11 @@ export default function EditTrekPage() {
       }
 
       const { id, ...trekFields } = formData;
+      if (selectedImage) {
+        setUploadingImage(true);
+        trekFields.image_url = await uploadTrekImage(selectedImage, formData.title);
+        setUploadingImage(false);
+      }
       const { error: updateError } = await supabase.from("treks").update({ ...trekFields, itinerary: "" }).eq("id", trekId);
 
       if (updateError) throw updateError;
@@ -170,6 +191,7 @@ export default function EditTrekPage() {
     } catch (err: any) {
       setError(err.message || "Failed to update trek");
     } finally {
+      setUploadingImage(false);
       setSaving(false);
     }
   };
@@ -372,9 +394,16 @@ export default function EditTrekPage() {
                 />
               </div>
 
-            {/* Image URL */}
+            {/* Image */}
             <div>
-              <label className="block text-sm font-semibold text-gray-800 mb-2">Image URL</label>
+              <label className="block text-sm font-semibold text-gray-800 mb-2">Trek Image</label>
+              {(imagePreview || formData.image_url) && (
+                <div className="mb-3 h-48 overflow-hidden rounded-lg bg-gray-100">
+                  <img src={imagePreview || formData.image_url} alt={`${formData.title} preview`} className="h-full w-full object-contain" />
+                </div>
+              )}
+              <input type="file" accept="image/*" onChange={handleImageChange} className="mb-3 block w-full text-sm text-gray-700" />
+              <p className="mb-2 text-xs text-gray-500">Choose a new image to replace the current one, or edit the URL below.</p>
               <input
                 type="text"
                 name="image_url"
@@ -388,10 +417,10 @@ export default function EditTrekPage() {
             <div className="flex gap-4">
               <button
                 type="submit"
-                disabled={saving}
+                disabled={saving || uploadingImage}
                 className="flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50"
               >
-                {saving ? "Saving..." : "Save Changes"}
+                {uploadingImage ? "Uploading Image..." : saving ? "Saving..." : "Save Changes"}
               </button>
               <Link
                 href="/admin/treks"

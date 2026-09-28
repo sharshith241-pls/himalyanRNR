@@ -270,17 +270,17 @@ export default function HomePage() {
       {/* Features Section */}
       <section className="py-12 sm:py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
-          <h3 className="text-3xl sm:text-4xl font-black text-center mb-8 sm:mb-12 text-gray-900">Why Choose Himalayan Runners?</h3>
-          <div className="grid md:grid-cols-3 gap-8">
+          <h3 className="text-2xl sm:text-3xl font-black text-center mb-6 sm:mb-8 text-gray-900">Why Choose Himalayan Runners?</h3>
+          <div className="grid md:grid-cols-3 gap-5 sm:gap-6">
             {[
               { icon: "🏆", title: "Expert Guides", desc: "Experienced mountain guides with years of expertise" },
               { icon: "🛡️", title: "Safe & Secure", desc: "Top-notch safety equipment and protocols" },
               { icon: "👥", title: "Community", desc: "Join thousands of adventure enthusiasts" },
             ].map((feature, i) => (
-              <div key={i} className="bg-white p-6 sm:p-8 rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-1 border-t-4 border-teal-600">
-                <div className="text-5xl mb-4">{feature.icon}</div>
-                <h4 className="text-2xl font-black mb-3 text-gray-900">{feature.title}</h4>
-                <p className="text-gray-700 font-medium text-base leading-relaxed">{feature.desc}</p>
+              <div key={i} className="bg-white p-4 sm:p-5 rounded-lg shadow-md hover:shadow-lg transition transform hover:-translate-y-1 border-t-4 border-teal-600">
+                <div className="text-4xl mb-3">{feature.icon}</div>
+                <h4 className="text-xl font-black mb-2 text-gray-900">{feature.title}</h4>
+                <p className="text-gray-700 font-medium text-sm leading-relaxed">{feature.desc}</p>
               </div>
             ))}
           </div>
